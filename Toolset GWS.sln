@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolSet", "ToolSet\ToolSet.csproj", "{DB425931-4F5C-43C3-9EE7-E5AAAFEAB893}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Web Security ToolSet", "PenTestToolSetWizard\PenTestToolSetWizard.vdproj", "{A9D555F4-BBDD-4F61-98DC-2C540A5EC8B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolSetSelfregister", "ToolSetSelfregister\ToolSetSelfregister.csproj", "{1851EB79-4A0C-41B2-933C-70CB7D7C445C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DB425931-4F5C-43C3-9EE7-E5AAAFEAB893}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB425931-4F5C-43C3-9EE7-E5AAAFEAB893}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB425931-4F5C-43C3-9EE7-E5AAAFEAB893}.Debug|x86.ActiveCfg = Debug|x86
+		{DB425931-4F5C-43C3-9EE7-E5AAAFEAB893}.Debug|x86.Build.0 = Debug|x86
+		{DB425931-4F5C-43C3-9EE7-E5AAAFEAB893}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB425931-4F5C-43C3-9EE7-E5AAAFEAB893}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB425931-4F5C-43C3-9EE7-E5AAAFEAB893}.Release|x86.ActiveCfg = Release|x86
+		{DB425931-4F5C-43C3-9EE7-E5AAAFEAB893}.Release|x86.Build.0 = Release|x86
+		{A9D555F4-BBDD-4F61-98DC-2C540A5EC8B0}.Debug|Any CPU.ActiveCfg = Debug
+		{A9D555F4-BBDD-4F61-98DC-2C540A5EC8B0}.Debug|Any CPU.Build.0 = Debug
+		{A9D555F4-BBDD-4F61-98DC-2C540A5EC8B0}.Debug|x86.ActiveCfg = Debug
+		{A9D555F4-BBDD-4F61-98DC-2C540A5EC8B0}.Debug|x86.Build.0 = Debug
+		{A9D555F4-BBDD-4F61-98DC-2C540A5EC8B0}.Release|Any CPU.ActiveCfg = Release
+		{A9D555F4-BBDD-4F61-98DC-2C540A5EC8B0}.Release|Any CPU.Build.0 = Release
+		{A9D555F4-BBDD-4F61-98DC-2C540A5EC8B0}.Release|x86.ActiveCfg = Release
+		{A9D555F4-BBDD-4F61-98DC-2C540A5EC8B0}.Release|x86.Build.0 = Release
+		{1851EB79-4A0C-41B2-933C-70CB7D7C445C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1851EB79-4A0C-41B2-933C-70CB7D7C445C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1851EB79-4A0C-41B2-933C-70CB7D7C445C}.Debug|x86.ActiveCfg = Debug|x86
+		{1851EB79-4A0C-41B2-933C-70CB7D7C445C}.Debug|x86.Build.0 = Debug|x86
+		{1851EB79-4A0C-41B2-933C-70CB7D7C445C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1851EB79-4A0C-41B2-933C-70CB7D7C445C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1851EB79-4A0C-41B2-933C-70CB7D7C445C}.Release|x86.ActiveCfg = Release|x86
+		{1851EB79-4A0C-41B2-933C-70CB7D7C445C}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		VisualSVNWorkingCopyRoot = .
+	EndGlobalSection
+EndGlobal
