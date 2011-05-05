@@ -1,36 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Net;
+﻿using System.Net;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode.DBExtractor
 {
-    public enum eModifyType
-    {
-        GET,
-        POST
-    }
-    public class InjectionInfos
-    {
-        public string InjectableParameter;
-        public string POST;
-        public string URL;
-        public eModifyType ModifyType;
-        public string DefaultValue;
-        public string Success;
-        public string Fail;
-        public CookieCollection CustomCookieCollection;
+   public enum ModifyType
+   {
+      GET,
+      POST
+   }
 
-        public InjectionInfos()
-        {
-            Success = string.Empty;
-            Fail = string.Empty;
-            InjectableParameter = string.Empty;
-            POST = string.Empty;
-            URL = string.Empty;
-            ModifyType = eModifyType.GET;
-            DefaultValue = string.Empty;
-            CustomCookieCollection = new CookieCollection();
-        }
-    }
+   public class InjectionInfos
+   {
+      public CookieCollection CustomCookieCollection;
+      public string DefaultValue;
+      public string Fail;
+      public string InjectableParameter;
+      public ModifyType ModifyType;
+      public string POST;
+      public string Success;
+      public string URL;
+
+      public InjectionInfos()
+      {
+         Success = string.Empty;
+         Fail = string.Empty;
+         InjectableParameter = string.Empty;
+         POST = string.Empty;
+         URL = string.Empty;
+         ModifyType = ModifyType.GET;
+         DefaultValue = string.Empty;
+         CustomCookieCollection = new CookieCollection();
+      }
+   }
 }

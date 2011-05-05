@@ -1,149 +1,153 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Collections;
+﻿using System.Collections.Generic;
 using System.Net;
+using System.Threading;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode.DBExtractor
 {
-    public delegate void EventFinishedDelegate(Request request);
-    class RequestManager
-    {
-        private Queue<Request> QueueList;
-        private object lockObject;
-        private List<Thread> Threads;
-        private ManualResetEvent NewRequestEvent;
-        public event EventFinishedDelegate RequestFinished;
-        public ManualResetEvent ManagerStopped;
-        private int currentRequestNr;
-        private int lastreturnedReqNr;
-        private bool ManagerActive;
-        public CookieCollection CustomCookieCollection;
+   public delegate void EventFinishedDelegate(Request request);
 
-        public RequestManager()
-        {
-            QueueList = new Queue<Request>();
-            lockObject = new object();
-            Threads = new List<Thread>();
-            NewRequestEvent = new ManualResetEvent(false);
-            ManagerStopped = new ManualResetEvent(false);
-            currentRequestNr = 0;
-            lastreturnedReqNr = -1;
-            ManagerActive = false;
-            CustomCookieCollection = new CookieCollection();
-        }
+   internal class RequestManager
+   {
+      private readonly ManualResetEvent _newRequestEvent;
+      private readonly Queue<Request> _queueList;
+      private readonly List<Thread> _threads;
+      private readonly object _lockObject;
+      private bool _managerActive;
+      private int _currentRequestNr;
+      private int _lastreturnedReqNr;
 
-        public int Count()
-        {
-            lock (lockObject)
+      public CookieCollection CustomCookieCollection { get; set; }
+      public ManualResetEvent ManagerStopped { get; set; }
+
+      public RequestManager()
+      {
+         _queueList = new Queue<Request>();
+         _lockObject = new object();
+         _threads = new List<Thread>();
+         _newRequestEvent = new ManualResetEvent(false);
+         _currentRequestNr = 0;
+         _lastreturnedReqNr = -1;
+         _managerActive = false;
+
+         ManagerStopped = new ManualResetEvent(false);
+         CustomCookieCollection = new CookieCollection();
+      }
+
+      public event EventFinishedDelegate RequestFinished;
+
+      public int Count()
+      {
+         lock (_lockObject)
+         {
+            return _queueList.Count;
+         }
+      }
+
+      public void StartThreads(int count)
+      {
+         _managerActive = true;
+         ManagerStopped.Reset();
+         _threads.Clear();
+
+         if (count <= 0 || count > 8)
+            return;
+         for (int i = 0; i < count; i++)
+         {
+            var thr = new Thread(ThreadFunc);
+            thr.Start();
+            _threads.Add(thr);
+         }
+      }
+
+      public void Stop()
+      {
+         _managerActive = false;
+         ManagerStopped.Set();
+         _currentRequestNr = 0;
+         _lastreturnedReqNr = -1;
+      }
+
+      public void AddRequest(Request req)
+      {
+         lock (_lockObject)
+         {
+            req.NaturalRequestNr = _currentRequestNr;
+            _currentRequestNr++;
+
+            _queueList.Enqueue(req);
+            _newRequestEvent.Set();
+         }
+      }
+
+      public Request GetRequest()
+      {
+         lock (_lockObject)
+         {
+            if (_queueList.Count > 0)
+               return _queueList.Dequeue();
+
+            return null;
+         }
+      }
+
+      private void ThreadFunc()
+      {
+         var wh = new WaitHandle[] { _newRequestEvent, ManagerStopped };
+
+         while (_managerActive)
+         {
+            if (WaitHandle.WaitAny(wh) == 0)
             {
-                return QueueList.Count;
+               Request req = GetRequest();
+               if (req != null)
+               {
+                  var cwr = new CreateWebrequest
+                               {
+                                  CustomCookieCollection = CustomCookieCollection
+                               };
+
+                  req.HTML = cwr.StringGetWebPage(req.URL, req.POST);
+                  OnRequestFinish(req);
+               }
             }
-        }
+         }
+      }
 
-        public void StartThreads(int Count)
-        {
-            ManagerActive = true;
-            ManagerStopped.Reset();
-            Threads.Clear();
+      private void OnRequestFinish(Request req)
+      {
+         if (RequestFinished != null)
+         {
+            while (_lastreturnedReqNr + 1 != req.NaturalRequestNr && _managerActive)
+               Thread.Sleep(100);
 
-            if (Count <= 0 || Count > 8)
-                return;
-            for (int i = 0; i < Count; i++)
+            lock (_lockObject)
             {
-                Thread thr = new Thread(new ThreadStart(ThreadFunc));
-                thr.Start();
-                Threads.Add(thr);
+               if (_managerActive)
+                  RequestFinished(req);
+
+               _lastreturnedReqNr++;
             }
-        }
+         }
+      }
+   }
 
-        public void Stop()
-        {
-            ManagerActive = false;
-            ManagerStopped.Set();
-            currentRequestNr = 0;
-            lastreturnedReqNr = -1;
-        }
+   public class Request
+   {
+      public DataBaseType DataBaseType;
+      public string Function;
+      public string HTML;
+      public string POST;
+      public string URL;
+      public int NaturalRequestNr;
 
-        public void AddRequest(Request req)
-        {
-            lock (lockObject)
-            {
-                req.naturalRequestNr = currentRequestNr;
-                currentRequestNr++;
-
-                QueueList.Enqueue(req);
-                NewRequestEvent.Set();
-            }
-        }
-
-        public Request GetRequest()
-        {
-            lock (lockObject)
-            {
-                if (QueueList.Count > 0)
-                    return QueueList.Dequeue();
-
-                return null;
-            }
-        }
-
-        private void ThreadFunc()
-        {
-            WaitHandle[] WH = new WaitHandle[] { NewRequestEvent, ManagerStopped };
-
-            while (ManagerActive)
-            {
-                if (WaitHandle.WaitAny(WH) == 0)
-                {
-                    Request Req = GetRequest();
-                    if (Req != null)
-                    {
-                        CreateWebrequest CWR = new CreateWebrequest();
-                        CWR.CustomCookieCollection = CustomCookieCollection;
-                        Req.HTML = CWR.StringGetWebPage(Req.URL, Req.POST);
-                        OnRequestFinish(Req);
-                    }
-                }
-            }
-        }
-
-        private void OnRequestFinish(Request req)
-        {
-            if (RequestFinished != null)
-            {
-                while (lastreturnedReqNr + 1 != req.naturalRequestNr && ManagerActive)
-                    Thread.Sleep(100);
-
-                lock (lockObject)
-                {
-                    if (ManagerActive)
-                        RequestFinished(req);
-
-                    lastreturnedReqNr++;
-                }
-            }
-        }
-    }
-
-    public class Request
-    {
-        public int naturalRequestNr;
-        public string URL;
-        public string POST;
-        public string HTML;
-        public eDataBase DataBaseType;
-        public string Function;
-
-        public Request()
-        {
-            naturalRequestNr = 0;
-            URL = string.Empty;
-            POST = string.Empty;
-            HTML = string.Empty;
-            DataBaseType = eDataBase.unknown;
-            Function = string.Empty;
-        }
-    }
+      public Request()
+      {
+         NaturalRequestNr = 0;
+         URL = string.Empty;
+         POST = string.Empty;
+         HTML = string.Empty;
+         DataBaseType = DataBaseType.Unknown;
+         Function = string.Empty;
+      }
+   }
 }

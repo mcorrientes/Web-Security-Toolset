@@ -1,44 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode.DBExtractor
 {
-    public class DatabaseInfo
-    {
-        public string DatabaseName;
-        public List<Table> Tables;
+   public class DatabaseInfo
+   {
+      public string DatabaseName { get; set; }
+      public List<Table> Tables { get; set; }
 
-        public DatabaseInfo()
-        {
-            DatabaseName = string.Empty;
-            Tables = new List<Table>();
-        }
-    }
+      public DatabaseInfo()
+      {
+         DatabaseName = string.Empty;
+         Tables = new List<Table>();
+      }
+   }
 
-    public class Table
-    {
-        public string TableName;
-        public List<Field> Fields;
+   public class Table
+   {
+      public string TableName;
+      public List<Field> Fields;
 
-        public Table()
-        {
-            TableName = string.Empty;
-            Fields = new List<Field>();
-        }
-    }
+      public Table()
+      {
+         TableName = string.Empty;
+         Fields = new List<Field>();
+      }
+   }
 
-    public class Field
-    {
-        public string FeldName;
-        public string FeldTyp;
-        public List<string> FeldWert;
+   public class Field
+   {
+      public string FeldName;
+      public string FeldTyp;
+      public List<string> FeldWert;
 
-        public Field()
-        {
-            FeldName = string.Empty;
-            FeldTyp = string.Empty;
-            FeldWert = new List<string>();
-        }
-    }
+      public Field()
+      {
+         FeldName = string.Empty;
+         FeldTyp = string.Empty;
+         FeldWert = new List<string>();
+      }
+   }
 }

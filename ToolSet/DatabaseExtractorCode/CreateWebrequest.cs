@@ -1,83 +1,83 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Net;
 using System.IO;
+using System.Net;
+using System.Text;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode
 {
-    class CreateWebrequest
-    {
-        public CookieCollection CustomCookieCollection;
+   internal class CreateWebrequest
+   {
+      public CookieCollection CustomCookieCollection;
 
-        public CreateWebrequest()
-        {
-            CustomCookieCollection = new CookieCollection();
-        }
+      public CreateWebrequest()
+      {
+         CustomCookieCollection = new CookieCollection();
+      }
 
-        public string StringGetWebPage(string URL, string POST)
-        {
-            if (URL == string.Empty)
+      public string StringGetWebPage(string url, string post)
+      {
+         if (url == string.Empty)
+         {
+            Console.WriteLine("URL is empty.");
+         }
+
+         string html = string.Empty;
+         try
+         {
+            // Create a request for the URL.         
+            var request = (HttpWebRequest) WebRequest.Create(url);
+
+            if (CustomCookieCollection.Count > 0)
             {
-                Console.WriteLine("URL ist leer");
+               string domain = string.Empty;
+               if (url.ToLower().StartsWith("http://"))
+                  domain = url.Remove(0, 7);
+               else if (url.ToLower().StartsWith("https://"))
+                  domain = url.Remove(0, 8);
+
+               int lastDomainSlash = domain.IndexOf('/');
+               if (lastDomainSlash > 0)
+                  domain = domain.Remove(lastDomainSlash);
+
+
+               request.CookieContainer = new CookieContainer(CustomCookieCollection.Count);
+               foreach (Cookie cookie in CustomCookieCollection)
+               {
+                  cookie.Domain = domain;
+                  request.CookieContainer.Add(cookie);
+               }
             }
 
-            string HTML = string.Empty;
-            try
+            if (post != string.Empty)
             {
-                // Create a request for the URL.         
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL);
-                
-                if (CustomCookieCollection.Count > 0)
-                {
-                    string Domain = string.Empty;
-                    if (URL.ToLower().StartsWith("http://"))
-                        Domain = URL.Remove(0, 7);
-                    else if (URL.ToLower().StartsWith("https://"))
-                        Domain = URL.Remove(0, 8);
-
-                    int lastDomainSlash = Domain.IndexOf('/');
-                    if (lastDomainSlash > 0)
-                        Domain = Domain.Remove(lastDomainSlash);
-
-
-                    request.CookieContainer = new CookieContainer(CustomCookieCollection.Count);
-                    foreach (Cookie cookie in CustomCookieCollection)
-                    {
-                        cookie.Domain = Domain;
-                        request.CookieContainer.Add(cookie);
-                    }
-                }
-
-                if (POST != string.Empty)
-                {
-                    request.Method = "POST";
-                    byte[] byteArray = Encoding.UTF8.GetBytes(POST);
-                    request.ContentType = "application/x-www-form-urlencoded";
-                    request.ContentLength = byteArray.Length;
-                    using (Stream dataStream = request.GetRequestStream())
-                    {
-                        dataStream.Write(byteArray, 0, byteArray.Length);
-                    }
-                    Console.WriteLine(POST);
-                }
-
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                using (Stream dataStream = response.GetResponseStream())
-                {
-                    using (StreamReader reader = new StreamReader(dataStream))
-                    {
-                        HTML = reader.ReadToEnd();
-                    }
-                }
-
-                response.Close();
+               request.Method = "POST";
+               byte[] byteArray = Encoding.UTF8.GetBytes(post);
+               request.ContentType = "application/x-www-form-urlencoded";
+               request.ContentLength = byteArray.Length;
+               using (Stream dataStream = request.GetRequestStream())
+               {
+                  dataStream.Write(byteArray, 0, byteArray.Length);
+               }
+               Console.WriteLine(post);
             }
-            catch (Exception ex)
+
+            var response = (HttpWebResponse) request.GetResponse();
+            using (Stream dataStream = response.GetResponseStream())
             {
-                Console.WriteLine("Fehler bei StringGetWebPage:" + ex);
+               if (dataStream != null)
+                  using (var reader = new StreamReader(dataStream))
+                  {
+                     html = reader.ReadToEnd();
+                  }
             }
-            return HTML;
-        }
-    }
+
+            response.Close();
+         }
+         catch (Exception ex)
+         {
+            Console.WriteLine("An Error occoured in Method StringGetWebPage():" + ex);
+         }
+         return html;
+      }
+   }
 }

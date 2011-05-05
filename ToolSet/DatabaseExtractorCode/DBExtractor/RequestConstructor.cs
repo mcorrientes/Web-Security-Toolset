@@ -1,91 +1,80 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Web;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode.DBExtractor
 {
-    class RequestConstructor
-    {
-        private InjectionInfos injectInfos;
+   internal class RequestConstructor
+   {
+      private readonly InjectionInfos _injectInfos;
 
-        private bool encodeWhiteSpace;
-        public bool EncodeWhiteSpace
-        {
-            get { return encodeWhiteSpace; }
-            set { encodeWhiteSpace = value; }
-        }
+      public bool EncodeWhiteSpace { get; set; }
 
-        private bool encodeCharacters;
-        public bool EncodeCharacters
-        {
-            get { return encodeCharacters; }
-            set { encodeCharacters = value; }
-        }
+      public bool EncodeCharacters { get; set; }
 
-        private string ModifiedURL;
-        private string ModifiedPOST;
+      private string _modifiedURL;
+      private string _modifiedPOST;
 
-        public RequestConstructor(InjectionInfos InjectInfos)
-        {
-            injectInfos = InjectInfos;
-            ModifiedURL = string.Empty;
-            ModifiedPOST = string.Empty;
-            encodeCharacters = false;
-            encodeWhiteSpace = false;
-        }
+      public string GetURL()
+      {
+         return _modifiedURL;
+      }
 
-        public void InsertQuery(string Query)
-        {
-                ModifiedURL = string.Empty;
-                ModifiedPOST = string.Empty;
-                ChangeRequest(Query);
-        }
+      public string GetPOST()
+      {
+         return _modifiedPOST;
+      }
 
-        private void ChangeRequest(string OrigQuery)
-        {
-            string query = string.Empty;
-            ModifiedURL = injectInfos.URL;
-            ModifiedPOST = injectInfos.POST;
+      public RequestConstructor(InjectionInfos injectInfos)
+      {
+         _injectInfos = injectInfos;
+         _modifiedURL = string.Empty;
+         _modifiedPOST = string.Empty;
+         EncodeCharacters = false;
+         EncodeWhiteSpace = false;
+      }
+
+      public void InsertQuery(string query)
+      {
+         _modifiedURL = string.Empty;
+         _modifiedPOST = string.Empty;
+         ChangeRequest(query);
+      }
+
+      private void ChangeRequest(string origQuery)
+      {
+         string query;
+         _modifiedURL = _injectInfos.URL;
+         _modifiedPOST = _injectInfos.POST;
+
+         if (!EncodeCharacters)
+         {
+            query = HttpUtility.UrlEncode(origQuery);
+            if (!EncodeWhiteSpace)
+               query = HttpUtility.UrlEncode(origQuery).Replace("+", "%20");
+         }
+         else
+            query = StringToHex(origQuery);
+
+         if (_injectInfos.ModifyType == ModifyType.GET)
+            _modifiedURL = _injectInfos.URL.Replace("{Inject}", query);
+         else
+            _modifiedPOST = _injectInfos.POST.Replace("{Inject}", query);
+      }
+
+      /// <summary>
+      /// Wandelt den übergebenen String in die Hexadezimaldarstellung
+      /// </summary>
+      /// <param name="hexstring">der umzuwandelnde String</param>
+      /// <returns>Hexadezimaldarstellung</returns>
+      private static string StringToHex(string hexstring)
+      {
+         var sb = new StringBuilder();
+         for (int i = 0; i < hexstring.Length; i++)
+            sb.Append("%" + Convert.ToInt32(hexstring[i]).ToString("x"));
+         return sb.ToString();
+      }
 
 
-            if (!encodeCharacters)
-            {
-                query = HttpUtility.UrlEncode(OrigQuery);
-                if (!encodeWhiteSpace)
-                    query = HttpUtility.UrlEncode(OrigQuery).Replace("+", "%20");
-            }
-            else
-                query = StringToHex(OrigQuery);
-
-            if (injectInfos.ModifyType == eModifyType.GET)
-                ModifiedURL = injectInfos.URL.Replace("{Inject}", query);
-            else
-                ModifiedPOST = injectInfos.POST.Replace("{Inject}", query);
-        }
-
-        /// <summary>
-        /// Wandelt den übergebenen String in die Hexadezimaldarstellung
-        /// </summary>
-        /// <param name="Hexstring">der umzuwandelnde String</param>
-        /// <returns>Hexadezimaldarstellung</returns>
-        private string StringToHex(string Hexstring)
-        {
-            string ausgabe = string.Empty;
-            StringBuilder SB = new StringBuilder();
-            for (int i = 0; i < Hexstring.Length; i++)
-                SB.Append("%" + Convert.ToInt32(Hexstring[i]).ToString("x"));
-            return SB.ToString();
-        }
-
-        public string GetURL()
-        {
-            return ModifiedURL;
-        }
-
-        public string GetPOST()
-        {
-            return ModifiedPOST;
-        }
-    }
+   }
 }

