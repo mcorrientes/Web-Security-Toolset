@@ -1,0 +1,14 @@
+# Compiled source #
+###################
+*.dll
+*.exe
+*.pdb
+*.manifest
+
+# OS generated files #
+######################
+Thumbs.db
+
+# Other files #
+###############
+*.suo
