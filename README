@@ -1,2 +1,18 @@
 Copyright 2011 Maximilian Corrientes
 https://github.com/mcorrientes/Web-Security-Toolset
+
+The Web Security Toolset contains following tools:
+
+Webfuzzer
+Database Extractor
+Injection Browser
+Authentication Tester
+Custom Request
+Subdomain Scanner
+Webserver Finder
+Webserver Information Catcher
+Portscanner
+HTTP Sniffer
+Encoder
+MD5 Searcher
+Regex Tester
