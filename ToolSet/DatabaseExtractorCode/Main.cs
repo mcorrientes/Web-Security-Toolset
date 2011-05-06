@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
-using System.Web;
 using System.Threading;
 using System.Xml;
 using System.Text.RegularExpressions;
@@ -14,24 +8,20 @@ using ToolSet.DatabaseExtractorCode.DBExtractor;
 
 namespace ToolSet.DatabaseExtractorCode
 {
-    public partial class UserControlDatabaseExtractor : UserControl
+    public partial class Main : Form
     {
         private DbExtractor DatabaseExtractor = new DbExtractor();
         private InjectionInfos InjectInfos;
         private CookieCollection CookieCol;
         private NetworkCredential netCred;
-        TabPage savedTab;
 
-        public UserControlDatabaseExtractor()
+        public Main()
         {
             InitializeComponent();
             System.Net.ServicePointManager.DefaultConnectionLimit = 32;
             CookieCol = new CookieCollection();
             netCred = new NetworkCredential();
-            savedTab = new TabPage();
-            RemoveDataTab();
         }
-
 
         #region Variables
         private bool awaitingFinish = false;
@@ -44,32 +34,8 @@ namespace ToolSet.DatabaseExtractorCode
         private string tName;
         #endregion
 
-        private void RemoveDataTab()
-        {
-            TabPage toRemove = new TabPage();
-            foreach (TabPage tab in tc_1.TabPages)
-            {
-                if (tab.Name == "tabPageData")
-                {
-                    toRemove = tab;
-                    break;
-                }
-            }
-            savedTab = toRemove;
-            tc_1.TabPages.Remove(toRemove);
-        }
-
-        private void AddDataTab()
-        {
-            foreach (TabPage tab in tc_1.TabPages)
-            {
-                if (tab.Name == "tabPageData")
-                    return;
-            }
-            tc_1.TabPages.Add(savedTab);
-        }
-
         #region Form
+
         private void raBu_Choose_CheckedChanged(object sender, EventArgs e)
         {
             if (raBu_Choose.Checked == false)
@@ -78,18 +44,17 @@ namespace ToolSet.DatabaseExtractorCode
             }
             else
             {
-                richTextBox_Preview.Text = string.Empty;
+                txt_Preview.Text = string.Empty;
                 txt_Post.Enabled = true;
                 PostAufteilen(txt_Post.Text);
             }
         }
-   
 
         private void raBu_Direct_CheckedChanged(object sender, EventArgs e)
         {
             if (raBu_Direct.Checked == true)
             {
-                richTextBox_Preview.Text = string.Empty;
+                txt_Preview.Text = string.Empty;
                 Zerhäcksler(txt_URL.Text);
             }
         }
@@ -109,9 +74,16 @@ namespace ToolSet.DatabaseExtractorCode
                 PostAufteilen(txt_Post.Text);
             }
         }
+
+        private void txt_Parameter_TextChanged(object sender, EventArgs e)
+        {
+            UpdateParameter(txt_Parameter.Text);
+        }
         #endregion
 
-        #region Listview
+        #region ListView
+
+
         public void PostAufteilen(string postdata)
         {
             lv_Parameterized.Items.Clear();
@@ -125,27 +97,27 @@ namespace ToolSet.DatabaseExtractorCode
             {
                 firstItem = true;
                 stücke = postdata.Split(new char[] { ';' });
-
+                
                 foreach (string s in stücke)
                 {
                     if (s.Contains("="))
                     {
-                        Item = new ListViewItem();
+                    Item = new ListViewItem();
 
-                        if (firstItem == true)
-                        { stück = s.Substring(0, s.IndexOf("=")) + "="; }
-                        else
-                        { stück = ";" + s.Substring(0, s.IndexOf("=")) + "="; }
+                    if (firstItem == true)
+                    { stück = s.Substring(0, s.IndexOf("=")) + "="; }
+                    else
+                    { stück = ";" + s.Substring(0, s.IndexOf("=")) + "="; }
 
-                        substück = s.Substring(s.IndexOf("=") + 1);
-                        Item.Text = stück;
-                        Item.SubItems.Add(substück);
-                        lv_Parameterized.Items.Add(Item);
+                    substück = s.Substring(s.IndexOf("=") + 1);
+                    Item.Text = stück;
+                    Item.SubItems.Add(substück);
+                    lv_Parameterized.Items.Add(Item);
                     }
                     firstItem = false;
                 }
             }
-            else if (postdata.Contains("="))
+            else if (postdata.Contains ("="))
             {
                 Item = new ListViewItem();
                 stück = txt_Post.Text.Substring(0, txt_Post.Text.IndexOf("=")) + "=";
@@ -198,7 +170,7 @@ namespace ToolSet.DatabaseExtractorCode
                         {
                             stück = s.Substring(0, s.IndexOf("=")) + "=";
                         }
-                        else
+                        else 
                         { stück = "&" + s.Substring(0, s.IndexOf("=")) + "="; }
                         Item.Text = stück;
                         substück = s.Substring(s.IndexOf("=") + 1);
@@ -210,9 +182,6 @@ namespace ToolSet.DatabaseExtractorCode
                 ShowPreview();
             }
         } 
-
-     
-
         private void lv_Parameterized_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
             ShowPreview();
@@ -247,8 +216,7 @@ namespace ToolSet.DatabaseExtractorCode
                     if (URLItem.SubItems.Count == 2)
                         url += URLItem.SubItems[1].Text;
                 }
-                //txt_Preview.Text = url + "{Inject}";
-                PreviewRed(url + "{Inject}");
+                txt_Preview.Text = url + "{Inject}";
             }
             else
             {
@@ -258,12 +226,11 @@ namespace ToolSet.DatabaseExtractorCode
                     if (URLItem.SubItems.Count == 2)
                         url += URLItem.SubItems[1].Text;
                 }
-                //txt_Preview.Text = uRLBegin + url + "{Inject}";
-                PreviewRed(uRLBegin + url + "{Inject}");
+                txt_Preview.Text = uRLBegin + url + "{Inject}";
             }
         }
 
-
+ 
         private void CheckedTrue()
         {
             string url = string.Empty;
@@ -277,8 +244,7 @@ namespace ToolSet.DatabaseExtractorCode
                     }
                     else url += lv_Parameterized.Items[i].Text + lv_Parameterized.Items[i].SubItems[1].Text;
                 }
-                //txt_Preview.Text = url;
-                PreviewRed(url);
+                txt_Preview.Text = url;
             }
             else
             {
@@ -290,38 +256,9 @@ namespace ToolSet.DatabaseExtractorCode
                     }
                     else url += lv_Parameterized.Items[i].Text + lv_Parameterized.Items[i].SubItems[1].Text;
                 }
-                //txt_Preview.Text = uRLBegin + url;
-                PreviewRed(uRLBegin + url);
+                txt_Preview.Text = uRLBegin + url;
             }
         }
-
-        private void PreviewRed(string previewText) 
-        {
-            richTextBox_Preview.Text = previewText;
-            try
-            {
-                Regex regex = new Regex("{Inject}");
-                MatchCollection matches = regex.Matches(previewText);
-                if (matches.Count > 0)
-                {
-                    for (int iMatch = 0; iMatch < matches.Count; iMatch++)
-                    {
-                        Match match = matches[iMatch];
-                        for (int i = 0; i < match.Groups.Count; i = i+2)
-                        {
-                            richTextBox_Preview.Select(match.Groups[i].Index, match.Groups[i].Length);
-                            richTextBox_Preview.SelectionColor = Color.Red;
-                            richTextBox_Preview.SelectionFont = new Font(this.Font, FontStyle.Bold);
-                        }
-                    }
-                }
-            }
-            catch (Exception Ex) 
-            {
-                Console.WriteLine("Regex hat versagt" + Ex);
-            }
-        }
-
 
         private void UpdateParameter(string value)
         {
@@ -338,7 +275,7 @@ namespace ToolSet.DatabaseExtractorCode
 
         private void lv_Parameterized_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-             try
+            try
             {
                 if (e.NewValue == CheckState.Checked)
                 {
@@ -357,7 +294,7 @@ namespace ToolSet.DatabaseExtractorCode
         #endregion
 
         #region Buttons
-        private void btn_Start_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             if (testForWrongInPut())
             {
@@ -372,18 +309,18 @@ namespace ToolSet.DatabaseExtractorCode
 
                 if (raBu_Choose.Checked == true)
                 {
-                    if (richTextBox_Preview.Text == string.Empty)
+                    if (txt_Preview.Text == string.Empty)
                     { InjectInfos.POST = txt_Post.Text + "{Inject}"; }
                     else
                     {
-                        InjectInfos.POST = richTextBox_Preview.Text;
+                        InjectInfos.POST = txt_Preview.Text;
                     }
-                    InjectInfos.URL = txt_URL.Text;
+                InjectInfos.URL = txt_URL.Text;
                 }
                 else
                 {
-                    InjectInfos.URL = richTextBox_Preview.Text;
-                    InjectInfos.POST = txt_Post.Text;
+                    InjectInfos.URL = txt_Preview.Text;
+                    InjectInfos.POST = txt_Post.Text; 
                 }
                 InjectInfos.InjectableParameter = "";
                 InjectInfos.DefaultValue = "";
@@ -399,19 +336,18 @@ namespace ToolSet.DatabaseExtractorCode
                 tv_Database.Nodes.Clear();
                 lv_Database.Clear();
                 DatabaseExtractor.ExtractingInfos.Status.Clear();
+                tc_1.SelectedTab = tc_1.TabPages[1];
                 btn_GetDatabase.Enabled = false;
                 btn_ReadColumns.Enabled = false;
                 btn_ReadRows.Enabled = false;
                 btn_ReadTables.Enabled = false;
                 awaitingFinish = true;
                 DatabaseExtractor.UserStartMethod();
-                AddDataTab();
-                tc_1.SelectedTab = tc_1.TabPages[1];
-                tabPageData.Focus();
                 Thread thread = new Thread(new ThreadStart(DatabaseExtractor.TestParameterInjectable));
                 thread.Start();
             }
         }
+
         private void btn_Stop_Click(object sender, EventArgs e)
         {
             DatabaseExtractor.UserStopMethod();
@@ -420,7 +356,7 @@ namespace ToolSet.DatabaseExtractorCode
 
         private void btn_ReadTables_Click(object sender, EventArgs e)
         {
-            richTextBoxQueryOutput.Visible = false;
+            txt_CustomQueryOutput.Visible = false;
             btn_Stop.Enabled = true;
             DatabaseExtractor.UserStartMethod();
             btn_ReadTables.Enabled = false;
@@ -436,15 +372,15 @@ namespace ToolSet.DatabaseExtractorCode
         {
             if (tocut.Contains("\\"))
             {
-                string back = tocut.Substring(tocut.LastIndexOf("\\") + 1);
-                return back;
+                 string back = tocut.Substring(tocut.LastIndexOf("\\")+1);
+                 return back;
             }
             else return tocut;
         }
 
         private void btn_ReadColumns_Click(object sender, EventArgs e)
         {
-            richTextBoxQueryOutput.Visible = false;
+            txt_CustomQueryOutput.Visible = false;
             btn_Stop.Enabled = true;
             DatabaseExtractor.UserStartMethod();
             btn_ReadColumns.Enabled = false;
@@ -460,7 +396,7 @@ namespace ToolSet.DatabaseExtractorCode
 
         private void btn_ReadRows_Click(object sender, EventArgs e)
         {
-            richTextBoxQueryOutput.Visible = false;
+            txt_CustomQueryOutput.Visible = false;
             btn_Stop.Enabled = true;
             DatabaseExtractor.UserStartMethod();
             btn_ReadRows.Enabled = false;
@@ -474,7 +410,7 @@ namespace ToolSet.DatabaseExtractorCode
 
         private void btn_GetDatabase_Click(object sender, EventArgs e)
         {
-            richTextBoxQueryOutput.Visible = false;
+            txt_CustomQueryOutput.Visible = false;
             btn_Stop.Enabled = true;
             DatabaseExtractor.UserStartMethod();
             Thread thread = new Thread(new ThreadStart(DatabaseExtractor.GetDatabases));
@@ -485,26 +421,17 @@ namespace ToolSet.DatabaseExtractorCode
 
         private void btn_ExecuteCustom_Click(object sender, EventArgs e)
         {
-            richTextBoxQueryOutput.Visible = true;
+            txt_CustomQueryOutput.Visible = true;
             DatabaseExtractor.UserStartMethod();
-            if (richTextBoxQuery.Text.ToLower().Contains("update") || richTextBoxQuery.Text.ToLower().Contains("truncate") || richTextBoxQuery.Text.ToLower().Contains("delete"))
+            if (txt_CustomQuery.Text.ToLower().Contains("update") || txt_CustomQuery.Text.ToLower().Contains("truncate") || txt_CustomQuery.Text.ToLower().Contains("delete"))
             {
                 MessageBox.Show("Alterations of SQL databases through this tool are not allowed", "Warning");
             }
-            else richTextBoxQueryOutput.Text = DatabaseExtractor.ExecuteCustomQuery(richTextBoxQuery.Text);
+            else txt_CustomQueryOutput.Text = DatabaseExtractor.ExecuteCustomQuery(txt_CustomQuery.Text);
         }
-
-        private void buttonCustomCookies_Click(object sender, EventArgs e)
-        {
-            frmCustomCookies dialog = new frmCustomCookies();
-            if (dialog.ShowDialog() == DialogResult.OK)
-                this.CookieCol = dialog.CookieCol;
-        }
-
         #endregion
 
         #region Treeview
-
         public void TreeviewFüllen()
         {
             tv_Database.SuspendLayout();
@@ -582,7 +509,7 @@ namespace ToolSet.DatabaseExtractorCode
             {
                 Field field = table.Fields[iField];
 
-                lv_Database.Columns.Add(new ColumnHeader() { DisplayIndex = iField, Text = field.FeldName + " : " + field.FeldTyp });
+                lv_Database.Columns.Add(new ColumnHeader() { DisplayIndex = iField, Text = field.FeldName + " : " + field.FeldTyp  });  
 
                 for (int iWert = 0; iWert < table.Fields[iField].FeldWert.Count; iWert++)
                 {
@@ -593,7 +520,6 @@ namespace ToolSet.DatabaseExtractorCode
                 }
             }
         }
-
 
         private void tv_Database_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -693,7 +619,7 @@ namespace ToolSet.DatabaseExtractorCode
             else return true;
         }
 
-        private void timerDatabaseExtractor_Tick(object sender, EventArgs e)
+        private void timerUpdateGUI_Tick(object sender, EventArgs e)
         {
             if (lv_Database.Items.Count > 0)
                 btn_Save.Enabled = true;
@@ -791,9 +717,9 @@ namespace ToolSet.DatabaseExtractorCode
 
                 for (int z = 0; z < lv_Database.Items.Count; z++)
                 {
-                    XmlElement subitem = xmlDoc.CreateElement("data");
-                    subitem.InnerText = lv_Database.Items[z].SubItems[i].Text;
-                    column.AppendChild(subitem);
+                      XmlElement subitem = xmlDoc.CreateElement("data");
+                      subitem.InnerText = lv_Database.Items[z].SubItems[i].Text;
+                      column.AppendChild(subitem);
                 }
             }
             tablename.AppendChild(columns);
@@ -809,28 +735,18 @@ namespace ToolSet.DatabaseExtractorCode
             string[] splitted = new string[2];
 
             if (tosplit.Contains(" : "))
-            {
-                Regex splitter = new Regex(" : ");
-                splitted = splitter.Split(tosplit);
+            { 
+            Regex splitter = new Regex(" : ");
+            splitted = splitter.Split(tosplit);
             }
             return splitted;
         }
 
-        private void buttonAddCookie_Click(object sender, EventArgs e)
+        private void buttonCustomCookies_Click(object sender, EventArgs e)
         {
-            CookieCol.Add(new Cookie(textBoxCookieName.Text, textBoxCookieValue.Text));
-            ListViewItem Item = new ListViewItem(textBoxCookieName.Text);
-            Item.SubItems.Add(new ListViewItem.ListViewSubItem() { Text = textBoxCookieValue.Text });
-            listViewCookies.Items.Add(Item);
+            frmCustomCookies dialog = new frmCustomCookies();
+            if (dialog.ShowDialog() == DialogResult.OK)
+                this.CookieCol = dialog.CookieCol;
         }
-
-        private void buttonClearCookies_Click(object sender, EventArgs e)
-        {
-            CookieCol = new CookieCollection();
-            listViewCookies.Items.Clear();
-        }
-
-
-
     }
 }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Text;
+using ToolSet.Global;
 
 namespace ToolSet.DatabaseExtractorCode
 {
@@ -17,15 +18,15 @@ namespace ToolSet.DatabaseExtractorCode
       public string StringGetWebPage(string url, string post)
       {
          if (url == string.Empty)
-         {
             Console.WriteLine("URL is empty.");
-         }
 
          string html = string.Empty;
          try
          {
             // Create a request for the URL.         
-            var request = (HttpWebRequest) WebRequest.Create(url);
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            if (Settings.UseProxy)
+               request.Proxy = Settings.Proxy;
 
             if (CustomCookieCollection.Count > 0)
             {
@@ -61,7 +62,7 @@ namespace ToolSet.DatabaseExtractorCode
                Console.WriteLine(post);
             }
 
-            var response = (HttpWebResponse) request.GetResponse();
+            var response = (HttpWebResponse)request.GetResponse();
             using (Stream dataStream = response.GetResponseStream())
             {
                if (dataStream != null)

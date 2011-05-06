@@ -84,8 +84,6 @@ D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\usertools.Cust
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\usertools.CustomRequest.frmCustomCookies.resources
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\usertools.CustomRequest.frmMain.resources
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.CustomRequestCode.UserControlCustomRequest.resources
-D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\Sql_Database_Extraction.frmCustomCookies.resources
-D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\Sql_Database_Extraction.Main.resources
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.DatabaseExtractorCode.UserControlDatabaseExtractor.resources
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.EncoderCode.UserControlEncoder.resources
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.HTTPSnifferCode.UserControlHTTPSniffer.resources
@@ -114,3 +112,6 @@ D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.Webser
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.WebserverInformantCode.UserControlWebserverInformant.resources
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ResGen.read.1.tlog
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ResGen.write.1.tlog
+D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.DatabaseExtractorCode.frmCustomCookies.resources
+D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.DatabaseExtractorCode.Main.resources
+D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.Global.ProxySettings.resources
