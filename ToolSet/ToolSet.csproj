@@ -166,12 +166,6 @@
     <Compile Include="DatabaseExtractorCode\frmCustomCookies.designer.cs">
       <DependentUpon>frmCustomCookies.cs</DependentUpon>
     </Compile>
-    <Compile Include="DatabaseExtractorCode\Main.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DatabaseExtractorCode\Main.designer.cs">
-      <DependentUpon>Main.cs</DependentUpon>
-    </Compile>
     <Compile Include="DatabaseExtractorCode\QueryConstructor\QueryConstructor.cs" />
     <Compile Include="DatabaseExtractorCode\QueryConstructor\UnionQueryConstructor.cs" />
     <Compile Include="DatabaseExtractorCode\UserControlDatabaseExtractor.cs">
@@ -298,10 +292,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseExtractorCode\frmCustomCookies.resx">
       <DependentUpon>frmCustomCookies.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseExtractorCode\Main.resx">
-      <DependentUpon>Main.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseExtractorCode\UserControlDatabaseExtractor.resx">

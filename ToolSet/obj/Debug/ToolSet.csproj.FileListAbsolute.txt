@@ -5,8 +5,6 @@ C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\usertools.CustomRe
 C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\usertools.CustomRequest.frmCustomCookies.resources
 C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\usertools.CustomRequest.frmMain.resources
 C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\ToolSet.CustomRequestCode.UserControlCustomRequest.resources
-C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\Sql_Database_Extraction.frmCustomCookies.resources
-C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\Sql_Database_Extraction.Main.resources
 C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\ToolSet.DatabaseExtractorCode.UserControlDatabaseExtractor.resources
 C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\ToolSet.EncoderCode.UserControlEncoder.resources
 C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\ToolSet.HTTPSnifferCode.UserControlHTTPSniffer.resources
@@ -115,3 +113,5 @@ D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ResGen.write.1
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.DatabaseExtractorCode.frmCustomCookies.resources
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.DatabaseExtractorCode.Main.resources
 D:\workspace\source\websec\Web-Security-Toolset\ToolSet\obj\Debug\ToolSet.Global.ProxySettings.resources
+C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\ToolSet.DatabaseExtractorCode.frmCustomCookies.resources
+C:\Users\fUSiON\github\Web Security Toolset\ToolSet\obj\Debug\ToolSet.Global.ProxySettings.resources
