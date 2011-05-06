@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using ToolSet.DatabaseExtractorCode;
+using ToolSet.Global;
 using ToolSet.Webfuzzer;
 using ToolSet.CustomRequestCode;
 using ToolSet.AuthenticationTesterCode;
@@ -565,6 +566,12 @@ namespace ToolSet
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnProxySettingsClick(object sender, EventArgs e)
+        {
+           var frm = new ProxySettings();
+           frm.ShowDialog(this);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Sql_Database_Extraction
+﻿namespace ToolSet.DatabaseExtractorCode
 {
     partial class Main
     {

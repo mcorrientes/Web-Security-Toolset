@@ -6,6 +6,7 @@ using System.Data;
 using System.Text;
 using System.Windows.Forms;
 using System.Net;
+using ToolSet.DatabaseExtractorCode;
 using usertools.WebFuzzer;
 using usertools.WebFuzzer.Forms;
 using usertools.WebFuzzer.Forms.Panels;
@@ -16,7 +17,6 @@ using System.Xml.Serialization;
 using iTextSharp.text.pdf;
 using iTextSharp.text;
 using iTextSharp;
-using Sql_Database_Extraction;
 
 namespace ToolSet.Webfuzzer
 {

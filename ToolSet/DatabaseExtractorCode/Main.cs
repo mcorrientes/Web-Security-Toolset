@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
-using System.Web;
 using System.Threading;
 using System.Xml;
 using System.Text.RegularExpressions;
 using System.Net;
-using ToolSet.DatabaseExtractorCode;
 using ToolSet.DatabaseExtractorCode.DBExtractor;
 
-namespace Sql_Database_Extraction
+namespace ToolSet.DatabaseExtractorCode
 {
     public partial class Main : Form
     {
