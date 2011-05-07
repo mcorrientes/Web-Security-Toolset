@@ -1,0 +1,11 @@
+C:\Users\fUSiON\Documents\Visual Studio 2010\Projects\ScanServer\csExWB\bin\x64\Debug\csExWB.dll
+C:\Users\fUSiON\Documents\Visual Studio 2010\Projects\ScanServer\csExWB\bin\x64\Debug\csExWB.pdb
+C:\Users\fUSiON\Documents\Visual Studio 2010\Projects\ScanServer\csExWB\bin\x64\Debug\Interop.ComUtilitiesLib.dll
+C:\Users\fUSiON\Documents\Visual Studio 2010\Projects\ScanServer\csExWB\obj\x64\Debug\ResolveAssemblyReference.cache
+C:\Users\fUSiON\Documents\Visual Studio 2010\Projects\ScanServer\csExWB\obj\x64\Debug\csExWB.dll
+C:\Users\fUSiON\Documents\Visual Studio 2010\Projects\ScanServer\csExWB\obj\x64\Debug\csExWB.pdb
+C:\Users\fUSiON\github\Web Security Toolset\csExWB\bin\x64\Debug\csExWB.dll
+C:\Users\fUSiON\github\Web Security Toolset\csExWB\bin\x64\Debug\csExWB.pdb
+C:\Users\fUSiON\github\Web Security Toolset\csExWB\obj\x64\Debug\ResolveAssemblyReference.cache
+C:\Users\fUSiON\github\Web Security Toolset\csExWB\obj\x64\Debug\csExWB.dll
+C:\Users\fUSiON\github\Web Security Toolset\csExWB\obj\x64\Debug\csExWB.pdb

@@ -1,0 +1,335 @@
+/////////////////////////
+//Obsolete - deprecated//
+/////////////////////////
+
+////cExWB.cs
+#region IManagedProtocolSink Members - Asynchronous pluggable protocols (APP), via ComUtilitiesLib COM library
+    //public void StartHTTPAPPManaged()
+    //{
+    //    AddThisIEServerHwndToComLib();
+    //    if (!m_csexwbCOMLib.HTTPprotocolManaged)
+    //    {
+    //        m_csexwbCOMLib.HTTPprotocolManaged = true;
+    //    }
+    //}
+    //public void StopHTTPAPPManaged()
+    //{
+    //    if (m_csexwbCOMLib.HTTPprotocolManaged)
+    //    {
+    //        m_csexwbCOMLib.HTTPprotocolManaged = false;
+    //    }
+    //}
+    //public void StartHTTPSAppManaged()
+    //{
+    //    AddThisIEServerHwndToComLib();
+    //    if (!m_csexwbCOMLib.HTTPSprotocolManaged)
+    //    {
+    //        m_csexwbCOMLib.HTTPSprotocolManaged = true;
+    //    }
+    //}
+    //public void StopHTTPSAppManaged()
+    //{
+    //    if (m_csexwbCOMLib.HTTPSprotocolManaged)
+    //    {
+    //        m_csexwbCOMLib.HTTPSprotocolManaged = false;
+    //    }
+    //}
+
+//Events.cs
+    #region Asynchronous pluggable protocols (APP) using COM component
+
+    public delegate void ProtocolHandlerOnResponseEventHandler(object sender, ProtocolHandlerOnResponseEventArgs e);
+    public class ProtocolHandlerOnResponseEventArgs : System.ComponentModel.CancelEventArgs
+    {
+        public ProtocolHandlerOnResponseEventArgs() { }
+        public void SetParameters(string url, string responseheaders, string redirectedurl, string redirectedheaders)
+        {
+            this.Cancel = false;
+            this.m_URL = url;
+            this.m_ResponseHeaders = responseheaders;
+            this.m_RedirectedUrl = redirectedurl;
+            this.m_RedirectHeaders = redirectedheaders;
+        }
+        public void Reset()
+        {
+            this.Cancel = false;
+            this.m_URL = string.Empty;
+            this.m_ResponseHeaders = string.Empty;
+            this.m_RedirectedUrl = string.Empty;
+            this.m_RedirectHeaders = string.Empty;
+        }
+        public string m_URL = string.Empty;
+        public string m_ResponseHeaders = string.Empty;
+        public string m_RedirectedUrl = string.Empty;
+        public string m_RedirectHeaders = string.Empty;
+    }
+
+    public delegate void ProtocolHandlerOnBeginTransactionEventHandler(object sender, ProtocolHandlerOnBeginTransactionEventArgs e);
+    public class ProtocolHandlerOnBeginTransactionEventArgs : System.ComponentModel.CancelEventArgs
+    {
+        public ProtocolHandlerOnBeginTransactionEventArgs() { }
+        public void SetParameters(string url, string requestheaders)
+        {
+            this.Cancel = false;
+            this.m_URL = url;
+            this.m_RequestHeaders = requestheaders;
+            //Additional headers can be added to what is already
+            //being send by Webbrowser control
+            this.m_AdditionalHeadersToAdd = string.Empty;
+        }
+        public void Reset()
+        {
+            this.Cancel = false;
+            this.m_URL = string.Empty;
+            this.m_RequestHeaders = string.Empty;
+            this.m_AdditionalHeadersToAdd = string.Empty;
+        }
+
+        public string m_URL = string.Empty;
+        public string m_RequestHeaders = string.Empty;
+        public string m_AdditionalHeadersToAdd = string.Empty;
+    }
+
+    #endregion
+
+//cEXWB.cs
+#region Downloader + Asynchronous pluggable protocols (APP), via ComUtilitiesLib/CSEXWBDLMANLib COM assembly
+
+//private void InitCOMLibrary()
+        //m_csexwbCOMLib.ProtocolHandlerOnBeginTransaction += new ComUtilitiesLib._IUtilManEvents_ProtocolHandlerOnBeginTransactionEventHandler(dlman_ProtocolHandlerOnBeginTransaction);
+        //m_csexwbCOMLib.ProtocolHandlerOnResponse += new ComUtilitiesLib._IUtilManEvents_ProtocolHandlerOnResponseEventHandler(dlman_ProtocolHandlerOnResponse);
+//
+
+    //public event csExWB.ProtocolHandlerOnBeginTransactionEventHandler ProtocolHandlerOnBeginTransaction = null;
+    //public event csExWB.ProtocolHandlerOnResponseEventHandler ProtocolHandlerOnResponse = null;
+
+    //private ProtocolHandlerOnBeginTransactionEventArgs ProtocolHandlerOnBeginTransactionEventArg = new ProtocolHandlerOnBeginTransactionEventArgs();
+    //private ProtocolHandlerOnResponseEventArgs ProtocolHandlerOnResponseEventArg = new ProtocolHandlerOnResponseEventArgs();
+
+    ///// <summary>
+    ///// Monitor and/or cancel every HTTP protocol request and responde
+    ///// including images, sounds, scripts, ... 
+    ///// Notifications are send via ProtocolHandlerOnResponse and
+    ///// ProtocolHandlerOnBeginTransaction events
+    ///// </summary>
+    //public void StartHTTPAPP()
+    //{
+    //    AddThisIEServerHwndToComLib();
+    //    if (!m_csexwbCOMLib.HTTPprotocol)
+    //    {
+    //        m_csexwbCOMLib.HTTPprotocol = true;
+    //    }
+    //}
+
+    //public void StopHTTPAPP()
+    //{
+    //    if (m_csexwbCOMLib.HTTPprotocol)
+    //    {
+    //        m_csexwbCOMLib.HTTPprotocol = false;
+    //    }
+    //}
+
+    //public void StopHTTPSAPP()
+    //{
+    //    if (m_csexwbCOMLib.HTTPSprotocol)
+    //    {
+    //        m_csexwbCOMLib.HTTPSprotocol = false;
+    //    }
+    //}
+
+    ///// <summary>
+    ///// Monitor and/or cancel every HTTPS protocol request and responde
+    ///// including images, sounds, scripts, ... 
+    ///// Notifications are send via ProtocolHandlerOnResponse and
+    ///// ProtocolHandlerOnBeginTransaction events
+    ///// </summary>
+    //public void StartHTTPSAPP()
+    //{
+    //    AddThisIEServerHwndToComLib();
+    //    if (!m_csexwbCOMLib.HTTPSprotocol)
+    //    {
+    //        m_csexwbCOMLib.HTTPSprotocol = true;
+    //    }
+    //}
+
+    //
+    //EVENTS
+    //
+
+    //void dlman_ProtocolHandlerOnResponse(int IEServerHwnd, string sURL, string sResponseHeaders, string sRedirectedUrl, string sRedirectHeaders, ref bool Cancel)
+    //{
+    //    if (ProtocolHandlerOnResponse != null)
+    //    {
+    //        ProtocolHandlerOnResponseEventArg.SetParameters(sURL, sResponseHeaders, sRedirectedUrl, sRedirectHeaders);
+    //        ProtocolHandlerOnResponse(this, ProtocolHandlerOnResponseEventArg);
+    //        if (ProtocolHandlerOnResponseEventArg.Cancel)
+    //            Cancel = true;
+    //        ProtocolHandlerOnResponseEventArg.Reset();
+    //    }
+    //}
+
+    //void dlman_ProtocolHandlerOnBeginTransaction(int IEServerHwnd, string sURL, string sRequestHeaders, ref string sAdditionalHeaders, ref bool Cancel)
+    //{
+    //    if (ProtocolHandlerOnBeginTransaction != null)
+    //    {
+    //        ProtocolHandlerOnBeginTransactionEventArg.SetParameters(sURL, sRequestHeaders);
+    //        ProtocolHandlerOnBeginTransaction(this, ProtocolHandlerOnBeginTransactionEventArg);
+    //        if (!ProtocolHandlerOnBeginTransactionEventArg.Cancel)
+    //        {
+    //            //Additional headers can be added to what is already
+    //            //being send by Webbrowser control
+    //            if (!string.IsNullOrEmpty(ProtocolHandlerOnBeginTransactionEventArg.m_AdditionalHeadersToAdd))
+    //                sAdditionalHeaders = ProtocolHandlerOnBeginTransactionEventArg.m_AdditionalHeadersToAdd;
+    //        }
+    //        else
+    //            Cancel = true;
+    //        ProtocolHandlerOnBeginTransactionEventArg.Reset();
+    //    }
+    //}
+#endregion
+
+#region HTML Document and Window Events
+
+    ////Used to handle HtmlDocument and HtmlWindow events
+    //public event csExWB.HTMLEventHandler HTMLEvent = null;
+    //private HTMLEventArgs HtmlEventArg = new HTMLEventArgs();
+    //private bool m_WantHTMLEvents = false;
+    //private bool m_WantHtmlDocumentEvents = false;
+    //private bool m_WantHtmlWindowEvents = false;
+    ////These instances take care of the toplevel document and window
+    ////For frameset sites, we use a collection of below classes
+    //private cHTMLDocumentEvents m_TopLevelHtmlDocumentevents = new cHTMLDocumentEvents();
+    //private cHTMLWindowEvents m_TopLevelHtmlWindowEvents = new cHTMLWindowEvents();
+    ////Template based lists
+    //private List<cHTMLDocumentEvents> m_HtmlDocumentEventsList = new List<cHTMLDocumentEvents>();
+    //private List<cHTMLWindowEvents> m_HtmlWindowEventsList = new List<cHTMLWindowEvents>();
+
+    ////For now, only HtmlDocumentEvents and HtmlWindowEvents2 are supported
+    //public void ActivateHTMLEvents(HTMLEventType EventType, int[] HTMLEventDispIds)
+    //{
+    //    if (EventType == HTMLEventType.HTMLDocumentEvent)
+    //    {
+    //        m_TopLevelHtmlDocumentevents.InitHTMLEvents(this, HTMLEventDispIds, Iid_Clsids.DIID_HTMLDocumentEvents2);
+    //        m_WantHtmlDocumentEvents = true;
+    //    }
+    //    else if (EventType == HTMLEventType.HTMLWindowEvent)
+    //    {
+    //        m_TopLevelHtmlWindowEvents.InitHTMLEvents(this, HTMLEventDispIds, Iid_Clsids.DIID_HTMLWindowEvents2);
+    //        m_WantHtmlWindowEvents = true;
+    //    }
+    //    else
+    //        return;
+    //    m_WantHTMLEvents = true;
+    //}
+
+    //private void ActivateSecondaryHtmlDocumentEvents(ref cHTMLDocumentEvents doceve)
+    //{
+    //    if (m_HtmlDocumentEventsList.Count == 0) //first one
+    //    {
+    //        doceve = new cHTMLDocumentEvents();
+    //    }
+    //    else
+    //    {
+    //        //Search for an idle one
+    //        foreach (cHTMLDocumentEvents eve in m_HtmlDocumentEventsList)
+    //        {
+    //            if (!eve.m_IsCOnnected)
+    //            {
+    //                doceve = eve;
+    //                break;
+    //            }
+    //        }
+    //        //Did we find any
+    //        if (doceve == null)
+    //            doceve = new cHTMLDocumentEvents();
+    //    }
+
+    //    if (doceve != null)
+    //    {
+    //        doceve.InitHTMLEvents(this, m_TopLevelHtmlDocumentevents.m_dispIds, m_TopLevelHtmlDocumentevents.m_guid);
+    //        m_HtmlDocumentEventsList.Add(doceve);
+    //    }
+    //}
+
+    //private void ActivateSecondaryHtmlWindowEvents(ref cHTMLWindowEvents wineve)
+    //{
+    //    if (m_HtmlWindowEventsList.Count == 0)
+    //    {
+    //        wineve = new cHTMLWindowEvents();
+    //    }
+    //    else
+    //    {
+    //        foreach (cHTMLWindowEvents eve in m_HtmlWindowEventsList)
+    //        {
+    //            if (!eve.m_IsCOnnected)
+    //            {
+    //                wineve = eve;
+    //                break;
+    //            }
+    //        }
+    //        if (wineve == null)
+    //            wineve = new cHTMLWindowEvents();
+    //    }
+
+    //    if (wineve != null)
+    //    {
+    //        wineve.InitHTMLEvents(this, m_TopLevelHtmlWindowEvents.m_dispIds, m_TopLevelHtmlWindowEvents.m_guid);
+    //        m_HtmlWindowEventsList.Add(wineve);
+    //    }
+    //}
+
+    //private void DisconnectHtmlDocumentEvents()
+    //{
+    //    if (m_HtmlDocumentEventsList.Count > 0)
+    //    {
+    //        foreach (cHTMLDocumentEvents doceve in m_HtmlDocumentEventsList)
+    //        {
+    //            doceve.DisconnectHtmlEvents();
+    //        }
+    //    }
+    //}
+
+    //private void DisconnectHtmlWindowEvnets()
+    //{
+    //    if (m_HtmlWindowEventsList.Count > 0)
+    //    {
+    //        foreach (cHTMLWindowEvents wineven in m_HtmlWindowEventsList)
+    //        {
+    //            wineven.DisconnectHtmlEvents();
+    //        }
+    //    }
+    //}
+
+    //public void DeactivateHTMLEvents(HTMLEventType EventType)
+    //{
+    //    m_WantHTMLEvents = false;
+    //    if (EventType == HTMLEventType.HTMLDocumentEvent)
+    //    {
+    //        m_WantHtmlDocumentEvents = false;
+    //        m_TopLevelHtmlDocumentevents.DisconnectHtmlEvents();
+    //        DisconnectHtmlDocumentEvents();
+    //    }
+    //    else
+    //    {
+    //        m_WantHtmlWindowEvents = false;
+    //        m_TopLevelHtmlWindowEvents.DisconnectHtmlEvents();
+    //        DisconnectHtmlWindowEvnets();
+    //    }
+    //}
+
+    //bool IHTMLEventCallBack.HandleHTMLEvent(HTMLEventType EventType, HTMLEventDispIds EventDispId, IHTMLEventObj pEvtObj)
+    //{
+    //    bool bret = true; //always allow default processing
+    //    if (HTMLEvent != null)
+    //    {
+    //        HtmlEventArg.ResetParameters(EventType, EventDispId, pEvtObj);
+    //        HTMLEvent(this, HtmlEventArg);
+    //        //Not all events are cancellable
+    //        if (HtmlEventArg.Cancel)
+    //            bret = false;
+    //        HtmlEventArg.ResetParameters(HTMLEventType.HTMLEventNone, 0, null);
+    //    }
+    //    return bret;
+    //}
+
+#endregion

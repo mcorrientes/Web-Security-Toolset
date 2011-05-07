@@ -1,0 +1,405 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E8E8BB5D-3302-4763-94F2-A8A238F7D6EA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>csExWB</RootNamespace>
+    <AssemblyName>csExWB</AssemblyName>
+    <StartupObject>
+    </StartupObject>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <SignAssembly>false</SignAssembly>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <AssemblyOriginatorKeyFile>Sign.snk</AssemblyOriginatorKeyFile>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DocumentationFile>
+    </DocumentationFile>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <DocumentationFile>
+    </DocumentationFile>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release x64|AnyCPU'">
+    <OutputPath>bin\Release x64\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\csExWB.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release x64|x86'">
+    <OutputPath>bin\x86\Release x64\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\x86\Release\csExWB.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release x64|x64'">
+    <OutputPath>bin\x64\Release x64\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisLogFile>bin\x64\Release\csExWB.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup>
+    <Reference Include="Interop.ComUtilitiesLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\References\Interop.ComUtilitiesLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="cEXWB.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DownloadRequestEventArgs.cs" />
+    <Compile Include="Events\GenericElementEventHandler.cs" />
+    <Compile Include="Events\HTMLDocumentEvents.cs" />
+    <Compile Include="Events\HTMLElementEvents.cs" />
+    <Compile Include="Events\HTMLScriptEvents.cs" />
+    <Compile Include="Events\HTMLSelectElementEvents.cs" />
+    <Compile Include="Events\HTMLWindowEvents.cs" />
+    <Compile Include="General_Classes\HTMLParser.cs" />
+    <Compile Include="Enums\Enums.cs" />
+    <Compile Include="Events\Events.cs" />
+    <Compile Include="General_Classes\HTMLEditDesigner.cs" />
+    <Compile Include="General_Classes\MultiSelectHTMLList.cs" />
+    <Compile Include="General_Interfaces\DWebBrowserEvents.cs" />
+    <Compile Include="General_Interfaces\DWebBrowserEvents2.cs" />
+    <Compile Include="General_Interfaces\IAsyncMoniker.cs" />
+    <Compile Include="General_Interfaces\IAuthenticate.cs" />
+    <Compile Include="General_Interfaces\IBinding.cs" />
+    <Compile Include="General_Interfaces\IBindStatusCallback.cs" />
+    <Compile Include="General_Interfaces\IClassFactory.cs" />
+    <Compile Include="General_Interfaces\IDispatchEX.cs" />
+    <Compile Include="General_Interfaces\IDocHostShowUI.cs" />
+    <Compile Include="General_Interfaces\IDocHostUIHandler.cs" />
+    <Compile Include="General_Interfaces\IDownloadManager.cs" />
+    <Compile Include="General_Interfaces\IDropTarget.cs" />
+    <Compile Include="General_Interfaces\IEnumSTATURL.cs" />
+    <Compile Include="General_Interfaces\IEnumTravelLogEntry.cs" />
+    <Compile Include="General_Interfaces\IEnumUnknwon.cs" />
+    <Compile Include="General_Interfaces\IHostDialogHelper.cs" />
+    <Compile Include="General_Interfaces\IHTMLEventCallBack.cs" />
+    <Compile Include="General_Interfaces\IHTMLOMWindowServices.cs" />
+    <Compile Include="General_Interfaces\IHttpNegotiate.cs" />
+    <Compile Include="General_Interfaces\IHttpSecurity.cs" />
+    <Compile Include="General_Interfaces\IInternetSecurityManager.cs" />
+    <Compile Include="General_Interfaces\IInternetSecurityManagerEx.cs" />
+    <Compile Include="General_Interfaces\IMalloc.cs" />
+    <Compile Include="General_Interfaces\INewWindowManager.cs" />
+    <Compile Include="General_Interfaces\IOleCommandTarget.cs" />
+    <Compile Include="General_Interfaces\IPersistMoniker.cs" />
+    <Compile Include="General_Interfaces\IPersistStreamInit.cs" />
+    <Compile Include="General_Interfaces\IPropertyNotifySink.cs" />
+    <Compile Include="General_Interfaces\IProtectFocus.cs" />
+    <Compile Include="General_Interfaces\IServiceProvider.cs" />
+    <Compile Include="General_Interfaces\IShellLinkA.cs" />
+    <Compile Include="General_Interfaces\IShellLinkW.cs" />
+    <Compile Include="General_Interfaces\IShellUIHelper.cs" />
+    <Compile Include="General_Interfaces\ITargetFrame2.cs" />
+    <Compile Include="General_Interfaces\IThumbnailCapture.cs" />
+    <Compile Include="General_Interfaces\ITravelLogEntry.cs" />
+    <Compile Include="General_Interfaces\ITravelLogStg.cs" />
+    <Compile Include="General_Interfaces\IUniformResourceLocatorA.cs" />
+    <Compile Include="General_Interfaces\IUniformResourceLocatorW.cs" />
+    <Compile Include="General_Interfaces\IUrlHistoryStg.cs" />
+    <Compile Include="General_Interfaces\IUrlHistoryStg2.cs" />
+    <Compile Include="General_Interfaces\IViewObject.cs" />
+    <Compile Include="General_Interfaces\IWebBrowser2.cs" />
+    <Compile Include="General_Interfaces\IWindowForBindingUI.cs" />
+    <Compile Include="General_Classes\Hresults.cs" />
+    <Compile Include="General_Classes\HTMLDispIDs.cs" />
+    <Compile Include="General_Classes\HTMLEditHelper.cs" />
+    <Compile Include="Events\HTMLEvents.cs">
+    </Compile>
+    <Compile Include="HTML_Interfaces\HTMLDocumentEvents2.cs" />
+    <Compile Include="HTML_Interfaces\HTMLElementEvents2.cs" />
+    <Compile Include="HTML_Interfaces\HTMLScriptEvents2.cs" />
+    <Compile Include="HTML_Interfaces\HTMLSelectElementEvents2.cs" />
+    <Compile Include="HTML_Interfaces\HTMLWindowEvents2.cs" />
+    <Compile Include="HTML_Interfaces\IDisplayPointer.cs" />
+    <Compile Include="HTML_Interfaces\IDisplayServices.cs" />
+    <Compile Include="HTML_Interfaces\IElementSegment.cs" />
+    <Compile Include="HTML_Interfaces\IHighlightRenderingServices.cs" />
+    <Compile Include="HTML_Interfaces\IHighlightSegment.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLAnchorElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLAnchorElement2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLAreaElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLAreasCollection.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLAttributeCollection.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLBaseElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLBaseFontElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLBodyElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLBodyElement2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLBRElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLButtonElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLCaret.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLChangeLog.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLChangePlayback.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLChangeSink.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLCommentElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLComputedStyle.cs" />
+    <Compile Include="HTML_Interfaces\IHtmlControlElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLControlRange.cs" />
+    <Compile Include="HTML_Interfaces\IHtmlControlRange2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLCurrentStyle.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLCurrentStyle2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLCurrentStyle3.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDataTransfer.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDocument.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDocument2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDocument3.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDocument4.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDocument5.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDOMAttribute.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDOMAttribute2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDOMChildrenCollection.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDOMNode.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDOMTextNode.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLDOMTextNode2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLEditDesigner.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLEditHost.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLEditServices.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLEditServices2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLElement2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLElement3.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLElementCollection.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLElementRender.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLEventObj.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLEventObj2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLEventObj4.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLFormElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLFrameBase.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLFrameBase2.cs" />
+    <Compile Include="HTML_Interfaces\IHtmlFramesCollection2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLFrameSetElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLHeadElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLHeaderElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLHRElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLIFrameElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLIFrameElement2.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLImageElementFactory.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLImgElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLInputButtonElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLInputElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLInputFileElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLInputHiddenElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLInputImage.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLInputTextElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLLIElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLLinkElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLMetaElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLNextIdElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLOptionElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLPainter.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLPaintSite.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLPopup.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLRect.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLRectCollection.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLRenderStyle.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLScriptElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLSelectElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLSelectionObject.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLStyle.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLStyleSheet.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLStyleSheetsCollection.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLTable.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLTableCell.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLTableCol.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLTableRow.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLTextAreaElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLTextRangeMetrics.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLTitleElement.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLTxtRange.cs" />
+    <Compile Include="HTML_Interfaces\IHtmlWindow2.cs" />
+    <Compile Include="General_Classes\Iid_Clsids.cs" />
+    <Compile Include="General_Classes\InternetSetOptionFlags.cs" />
+    <Compile Include="General_Classes\LoadHTMLMoniker.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLWindow3.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLWindow4.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLWindow5.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLXMLHttpRequest.cs" />
+    <Compile Include="HTML_Interfaces\IHTMLXMLHttpRequestFactory.cs" />
+    <Compile Include="HTML_Interfaces\ILineInfo.cs" />
+    <Compile Include="HTML_Interfaces\IMarkupContainer.cs" />
+    <Compile Include="HTML_Interfaces\IMarkupContainer2.cs" />
+    <Compile Include="HTML_Interfaces\IMarkupPointer.cs" />
+    <Compile Include="HTML_Interfaces\IMarkupServices.cs" />
+    <Compile Include="HTML_Interfaces\IOmNavigator.cs" />
+    <Compile Include="HTML_Interfaces\ISegment.cs" />
+    <Compile Include="HTML_Interfaces\ISegmentList.cs" />
+    <Compile Include="HTML_Interfaces\ISegmentListIterator.cs" />
+    <Compile Include="HTML_Interfaces\ISelectionServices.cs" />
+    <Compile Include="HTML_Interfaces\ISelectionServicesListener.cs" />
+    <Compile Include="ICustomProtocolSink.cs" />
+    <Compile Include="IManagedProtocolSink.cs" />
+    <Compile Include="Ole_Interfaces\IOleClientSite.cs" />
+    <Compile Include="Ole_Interfaces\IOleContainer.cs" />
+    <Compile Include="Ole_Interfaces\IOleControl.cs" />
+    <Compile Include="Ole_Interfaces\IOleInPlaceActiveObject.cs" />
+    <Compile Include="Ole_Interfaces\IOleInPlaceFrame.cs" />
+    <Compile Include="Ole_Interfaces\IOleInPlaceObject.cs" />
+    <Compile Include="Ole_Interfaces\IOleInPlaceSite.cs" />
+    <Compile Include="Ole_Interfaces\IOleInPlaceUIWindow.cs" />
+    <Compile Include="Ole_Interfaces\IOleObject.cs" />
+    <Compile Include="Ole_Interfaces\IOleWindow.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Structs\Structs.cs" />
+    <Compile Include="General_Classes\TreeViewSerializer.cs" />
+    <Compile Include="General_Classes\WinApis.cs" />
+    <Compile Include="General_Classes\WindowEnumerator.cs" />
+    <Compile Include="General_Classes\WindowsHookUtil.cs" />
+    <Compile Include="General_Classes\WindowsMessages.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ChangeLog.txt" />
+    <Content Include="HTML_Interfaces\AConversionRules.txt" />
+    <Content Include="ObsoleteAndRemoved.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Sign.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+</Project>

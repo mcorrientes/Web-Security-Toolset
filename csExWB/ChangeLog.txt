@@ -1,0 +1,550 @@
+
+Please make sure to read the additions and modifications before attempting to run the demoes or incorporate the changes!
+
+=====================================
+04 June 2008 - Version (2.0.0.2)
+=====================================
+
+Added:
+1)ProtocolHandlerDataFullyAvailable event - Indicates when a resource has been fully downloaded by WinInet
+2)ProtocolHandlerDataFullyRead event - Indicates when a resource has been fully read by MSHTML
+3)ProtocolHandlerOperationFailed event - Indicates when downloading of a resource has failed
+4)IHTMLStyleSheet interface
+5)IHTMLLinkElement interface
+6)TravelLogEntries enum
+7)GetTravelLogEntries(TravelLogEntries flags) method
+8)TravelLogTravelTo method
+9)GenericElementEventHandler class
+10)WBTopLevelOnLoad event
+11)WBTopLevelOnUnload event
+12)WBSecondaryOnLoad event
+13)WBSecondaryOnUnload event
+14)IMarkupContainer2 interface
+15)IHTMLChangePlayback interface
+16)IHTMLChangeSink interface
+17)IHTMLChangeLog interface
+18)WBOnDocumentChanged event
+19)ConsoleApp project - Simple demonstartion of how to use this control in a console application
+20)PageActivityMonitor - Simple demonstration of how to monitor resource downloads and page onload event via protocol handler events and new WBTopLevelOnLoad,... events
+20)HTMLParserWrapper class
+21)SetupSubclassing method to IEServerWindow class - To setup subclassing of "Internet Explorer_Server" window, in case initial subclassing was not successful (called from IOleInPlaceSite.OnUIActivate() method)
+22)Two new arguments to ContextMenuEventArgs which include an IHtmlElement and it's client coordinates. Also modified the routine to account for frame/iframe
+
+Modified:
+1)frmMain.cEXWB1_WBLButtonUp - To demonstrate how to determine a Mouse Click
+2)frmMain.cEXWB1_WBLButtonDown - To demonstrate how to determine a Mouse Click
+3)frmMain_Load - Added a call to NavToBlank
+4)frmMain.AddNewBrowser - Added WBLButtonxx events to the new instances handling
+5)frmPopup - Added HTMLOMWindowServices_resizeTo and HTMLOMWindowServices_moveTo events for IE7 handling of Javascript MoveTo and ResizeTo calls
+6)Added a null check for URL parameter in cEXWB.cs following methods:
+DWebBrowserEvents2.BeforeNavigate2
+DWebBrowserEvents2.DocumentComplete
+DWebBrowserEvents2.NavigateComplete2
+DWebBrowserEvents2.NavigateError
+7)AutomationTask_PerformAuthentication method - To account for frames/iframes such as igoogle, gmail, ... login screens
+8)cEXWB1_WBContextMenu to reflect new parameters
+
+Bug Fixs:
+1)The first entry in the history (TravelLog) was disappearing
+In InternalCreateWB method, comment
+//if(!string.IsNullOrEmpty(m_sUrl))
+//    this.Navigate(m_sUrl);
+//else
+//    this.Navigate(m_AboutBlank);
+
+2)In IOleInPlaceSite.OnInPlaceActivate() added a call to Application.DoEvents();
+4)In IOleInPlaceSite.OnUIActivate() added a check to determine if the we do have the "Internet Explorer_Server" and if it is subclassed
+3)Added a check for IFRAME within the loop in IEServerWindow.FireMouseEvent method
+4)frmPopup.frmPopup_FormClosing
+5)frmPopup.cEXWB1_WindowClosing
+6)cEXWB.ElementFromPoint - Added a check in the inner loop for iframe
+
+7)ComUtilities::ManagedAppBridge.cpp file
+
+A)CManagedAppBridge::DownloadCompleteManagedCache method
+Added a routine to load the local cache file when a local filename is requested,
+as for Silverlight, we need to actually load the and pass it to the MSHTML engine during Read() calls
+
+B)CManagedAppBridge::StartEx method
+Added a call to the default protocol handler in case we were not able to resolve the url
+C)CManagedAppBridgeSink::Switch method
+Comment out
+	//if( (pProtocolData->grfFlags & PD_FORCE_SWITCH) == 0)
+	//	pProtocolData->grfFlags |= PD_FORCE_SWITCH;
+Apparently, under certain conditions, forcing a switch to the main thread will casue a deadlock
+example, http://www.nrj.fr/music
+
+D)CManagedAppBridgeSink::BeginningTransaction and CManagedAppBridgeSink::ReportProgress
+Added delete[] pbuf as the buffer was not being deleted
+
+=====================================
+17 Mar 2008 - Version (2.0.0.1)
+=====================================
+
+Managed and custom protocol handlers:
+======================================
+
+These are the two major additions to this control which give the client total control over downloading of the resources during a navigation.
+This includes HTTP, HTTPS and custom protocols.
+
+The functionality is acheived by addition of two new ATL classes to the COM library. CManagedAppBridge and CCustManageApp.
+
+CManagedAppBridge/CCustManageApp are designed to raise an event (OnStartManagedAPP/OnStartCustManagedApp) in IInternetProtocolRoot::start method passing URL, initial request headers (CManagedAppBridge), Any post data (CManagedAppBridge), any post data MIME type (CManagedAppBridge), and an IDispatch (class instance) to csEXWB control.
+Client in turn is notified via DownloadRequestxxxx/CustomDownloadRequest events.
+The event argusment (xxxxDownloadRequestEventArgs/CustomDownloadRequestEventArgs) contains all the parameters passed from COM along with any relavent information.
+
+By default, Protocol Handlers are activated internaly when the Internet_Explorer Server handle is available.
+Flow of execution:
+
+    Download Request Handled by Client:
+        Client subscribes to (activates) DownloadRequestAsynch and/or DownloadRequestSynch events
+            Asynch -Control Fires-> DownloadRequestAsynch
+                NeedFileName
+                    -Client Calls->
+                        AsynchDownloadRequestEventArgs.DownloadCompletedNeedFileName
+                NeedData
+                    -Client Calls->
+                        AsynchDownloadRequestEventArgs.DownloadCompleted
+            Synch -Control Fires-> DownloadRequestSynch
+                NeedFilename
+                    -Client Sets->
+                        SynchDownloadRequestEventArgs.CacheFileName
+                        SynchDownloadRequestEventArgs.Url
+                        SynchDownloadRequestEventArgs.DownloadDataMimeType
+                NeedData
+                    -Client Sets->
+                        SynchDownloadRequestEventArgs.DownloadData
+                        SynchDownloadRequestEventArgs.Url
+                        SynchDownloadRequestEventArgs.DownloadDataMimeType
+
+    Download Request Handled by Default Implementation:
+        Client subscribes to (activates) ProtocolHandlerBeginTransaction and/or ProtocolHandlerOnResponse events
+            -Control Fires-> ProtocolHandlerBeginTransaction (Client has achance to add additional request headers)
+            -Control Fires-> ProtocolHandlerOnResponse
+
+To cancel a request:
+	Asynch (in DownloadRequestAsynch event handler): 
+		-Client Calls-> AsynchDownloadRequestEventArgs.CancelDownloadRequest
+	Synch (in DownloadRequestSynch event handler):
+		-Client Sets to true-> SynchDownloadRequestEventArgs.CancelDownload
+
+To have the default iplementation download a resource:
+	-In DownloadRequestAsynch and DownloadRequestSynch event handlers
+	-Client Sets-> xxxxDownloadRequestEventArgs.ClientHandled to false
+
+IMPORTANT:
+==========
+Custom protocol handler needs access to registry.
+StartCustomProtocol - Activates a custom protocol by registering CLSID of the CCustManageApp under "HKEY_CLASSES_ROOT\\PROTOCOLS\\Handler\\" registry key for the target protocol (mydata)
+StopCustomProtocol - Deactivates a previously activated custom protocol by deleting the registry key added to "HKEY_CLASSES_ROOT\\PROTOCOLS\\Handler\\"
+
+AppControl demo:
+================
+AppControl demo application - A simple application to demonstrate the usage of the new features. It includes a very simple Synch and threaded downloaders to download resources and upon completion notifies the csEXWB client. It also contains a simple example of custom protocol usage and handling.
+
+NOTE:
+AppControl uses a temp folder (System default temporary folder) to act as a temp cache.
+Please make sure before running the AppControl to adjust the name of the folder.
+The temp folder is created and deleted in load and unload events of the Form1.
+
+Added:
+======
+1) A check for MIME type to AsynchDownloadRequestEventArgs.DownloadCompleted and CustomDownloadRequestEventArgs.DownloadCompleted methods. If MIME type is empty then it is set to text/html
+2) A check for pre-defined protocols to StartCustomProtocol and StopCustomProtocol methods. Client is not allowed to register them.
+3) istoplevel parameter to NavigateComplete2 event - Indicates if toplevel browser is at hand
+4) ClickActiveElement method - Simulates a click on the active element
+5) GetActiveWebBrowser2 method - Attempts to retreive active IWebbrowser2 instance. Accounts for frames
+6) GetActiveDocument3 method - Attempts to retreive IHTMLDocument3 instance of active document
+7) GetActiveDocument4 method - Attempts to retreive IHTMLDocument4 instance of active document
+8) GetActiveWindow2 method - Attempts to retreive IHTMLWindow2 instance of active document
+9) frmAnchor form - A replacement for MSHTML insert anchor default form. Right clicking on the default MSHTML insert anchor form generates an exception in Vista.
+10) FileDownloadExDownloadFileFullyWritten event - Notifies the client when the downloaded file has been fully written to disk.
+11) WBStop event - Notifies the client that webbrowser stop() method has been invoked.
+
+The next three events accounts for frames.
+Able to handle IFrames (cross domain issues), Framesets, and none maximized browser window.
+It passes html element currently under the mouse pointer along with client left + top, 
+the elements offesetx and offsety, and whether Ctrl + Shift keys are pressed.
+12) WBLButtonDown event - Notifies the client of a LButtonDown.
+13) WBLButtonUp event - Notifies the client of a LButtonUp.
+14) WBMouseMove event - Notifies the client of a MouseMove.
+
+15) ElementFromPoint overloaded to account for Frames and Iframes
+
+16) DownloadRequestAsynch event
+- AsynchDownloadRequestEventHandler
+- AsynchDownloadRequestEventArgs
+17) DownloadRequestSynch event
+- SynchDownloadRequestEventHandler
+- SynchDownloadRequestEventArgs
+
+19) IManagedProtocolSink interface - Implemented by csEXWB control. Callback mechanism from DownloadRequestEventArgs
+20) DownloadRequestxxxx events - Subscribed by client application to receive notifications for resource downloads
+
+21) ICustomProtocolSink interface - Implemented by csEXWB control. Callback mechanism from CustomDownloadRequestEventArgs
+22) CustomDownloadRequest event - Subscribed by client application to receive notifications for resource downloads
+- CustomDownloadRequestEventHandler
+- CustomDownloadRequestEventArgs
+
+23) IHTMLXMLHttpRequest inteface
+24) IHTMLXMLHttpRequestFactory interface
+25) IHTMLWindow5 interface
+
+26) HTMLEditHelper.RemoveUnderline - Attempts to remove a previous underlined text
+27) HTMLEditHelper.UnderLineWord2 - Attempts to unerline a given IHTMLTxtRange instance - Please refer to UnderlineWord5() method in frmHTMLeditor.cs for a sample usage
+
+28) ElementToPoint - Attempts to return absolute position of a given element as a Point
+29) GetElementsByNameOrId - Attempts to return a List<IHTMLElement> matching given name of id - Accounts for frames
+
+30) ATLTRACE information to the COM library (CManagedAppBridge class) which should aid in debugging the Managed protocol handler part (Visible in Output window during debugging of the AppControl/Demo/...).
+- In order to use ATLTRACE features, you need to reference the Debug build of the ComUtilities component
+- I have included a Release and Debug builds of the component located in the ComUtilities subfolder
+
+31) Now the COM library builds both in Debug and Release without any errors.
+
+32) SavePageAsMHT - Attempts to save a given url in a single file MHTML (mht), resulting file can be opened in webbrowser/IE
+I have commented out this method as it requires a reference to "Microsoft CDO for Windows 2000 Library" COM library.
+To activate the method, set a reference to "Microsoft CDO for Windows 2000 Library" COM library and uncomment the method to use.
+You should also note that the newest version of the CDO library cannot be installed on a machine with Outlook installed ( 266418 (http://support.microsoft.com/kb/266418/) Microsoft does not support installing Exchange Server components and Outlook on the same computer). The version for Windows 2000 does not have this issue.
+Latest CDO location: http://support.microsoft.com/kb/171440/ - However, this is the page for the 1.2.1 version: http://www.microsoft.com/downloads/details.aspx?familyid=2714320D-C997-4DE1-986F-24F081725D36&displaylang=en 
+Thank you tonyB.
+
+33) Started building the ComUtilities with the option "statically linked to ATL" to reduce dependencies on ATLx.dll
+
+Replaced:
+=========
+
+1) cHTMLElementEvents with HTMLElementEvents (C# compliant)
+- frmHTMLeditor modified to use the HTMLElementEvents class
+- frmHTMLDialogHandler modified to use the new classes
+2) cHTMLDocumentEvents with HTMLDocumentEvents
+3) cHTMLScriptEvents with HTMLScriptEvents
+4) cHTMLSelectEvents with HTMLSelectEvents
+5) cHTMLWindowEvents with HTMLWindowEvents
+
+Modified:
+=========
+
+1) GetWordUnderMouse method - It was reporting bogus values if mouse pointer was over an empty area
+2) GetActiveElement method - Now if the active element is a Frame or Iframe, it attempts to find the active element within that object
+3) HTMLEditHelper.UnderLineWord - Modified to retain underline word's font and font size
+4) cEXWB.IManagedProtocolSink.ManagedAppDownloadCompleted - m_APPSinkData module level variable was replace with APPSinkData method level varaible
+- For unknown reasons m_APPSinkData was being set to null before COM library had a chance to copy the data to a local buffer
+5) IDocHostUIHandler.GetExternal - If m_WinExternal variable is null when this method is called, an empty object is assigned and returned.
+- To avoid scripts checking for window.external causing the javascript error "not implemented" being generated.
+6) ProtocolHandlerOnResponseEventArgs class
+7) ProtocolHandlerOnBeginTransactionEventArgs class
+8) Moved frmRequestResponseHeaders form to AppControl project.
+9)LocationUrl set property - was using m_sLastSearch instead of m_sUrl variable
+10) Moved activation and deactivation of the IEServerWindow instance from
+- IOleInPlaceSite.OnUIActivate and IOleInPlaceSite.OnUIDeactivate to
+- IOleInPlaceSite.OnInPlaceActivate and IOleInPlaceSite.OnInPlaceDeactivate
+- OnUIActivate was being called many many times due to focus gain and lost calls
+- OnInPlaceActivate is called only once
+
+Removed:
+=========
+
+1) IsLeftMouseClicked property
+2) Internal support for HTML Document and Window Events
+as they were unable to account for frameset documents
+3) IHTMLEventCallBack interface
+4) #region HTML Document and Window Events - Deprecated
+- HTMLEvent event
+- ActivateHTMLEvents method
+- DeactivateHTMLEvents method
+5) frmHTMLDialogHandler from DemoApp project as it required a refernce to the COM library.
+6) The original APP handling has been replaced with the new ManagedProotcol Handlers
+- StartHTTPAPP()
+- StartHTTPSAPP()
+- StopHTTPAPP()
+- StopHTTPSAPP()
+
+===============================
+28 Oct 2007 - Version (1.0.0.7)
+===============================
+
+Methods:
+HTMLEditHelper class:
+	SetCursorAtElementStart - Attempts to set the cursor at the start of the given html element The element must be a textual element such as P
+	GetCharIndexFromPos - Attempts to retreive char index from given X and Y coordinates relative to the body content. The point must be in client coordinates
+	GetPosFromCharIndex - Attempts to retreive a character position relative to the body content based on the character index.
+	GetCaretPosition - Attempts to retreive Caret position
+	GetWordUnderMouse - Attempts to retrive a word located under mouse pointer relative to body content
+	SetSelectionTextFromClipboard - Attempts to set the selection text from clipboard
+
+Misc:
+Added ONMOUSEMOVE event handling to frmHTMLeditor.cs to demonstrate GetWordUnderMouse functionality,
+as well as how to change cursor if mouse is over an "A" element.
+
+Interface:
+HTMLScriptEvents2
+IInternetSecurityManagerEx
+
+Class:
+cHTMLScriptEvents2 - to handle script events
+
+Enums:
+PUAFOUT - Added (IInternetSecurityManagerEx)
+ProcessUrlActionFlags - Added new flags
+URLACTION - Added new flags
+
+BUG Fixs:
+modified IHttpSecurity.OnSecurityProblem to accept other return values other than RPC_E_RETRY, S_FALSE, and E_ABORT
+OnGotFocus override method
+WndProc of IEServerWindow class
+
+    //To determine if a left mouse click has occured 
+case WindowsMessages.WM_LBUTTONDOWN: 
+    //This is needed as user may click and move the mouse 
+    //out of the control and release it which result 
+    //in no mouse up being fired 
+    m_mouseclicked = false; 
+    break; 
+case WindowsMessages.WM_LBUTTONUP: 
+    m_mouseclicked = true; 
+    if (!browser.m_InternalHasFocus) //Addition 
+        browser.Focus(); 
+    break;
+case WindowsMessages.WM_KILLFOCUS:
+    browser.m_InternalHasFocus = false;
+    //Added to resolve an issue with tabbing into this control
+    //and not seeing the cursor when in designmode == "on"
+    if(browser.m_WBOleInPlaceObject != null)
+        browser.m_WBOleInPlaceObject.UIDeactivate();
+
+Some explanation, if you set focus to the control using Focus() or 
+tab, the underlying control which hosts the webbrowser control fires 
+the OnGotFocus event which works fine. But, if (as you described), you 
+click inside the browser while the focus is on another control 
+(button), the OnGotFocus event is never fired as the underlying 
+control has no way of knowing that the webbrowser has received the 
+focus, hence the button retained it's focus state. To fix this, I 
+added a variable (m_InternalHasFocus) to the cEXWB class to keep track 
+of the webbrowser control's focus state and in the case of 
+WindowsMessages.WM_LBUTTONUP, I am checking to see if webbrowser has 
+focus, if not then a call to Focus method fixs the issue.
+
+===============================
+12 Oct 2007 - Version (1.0.0.6)
+===============================
+Methods:
+GetAllLinks - Attempts to collect and return a collection of "A" elements from the document. Accounts for frames.
+FindInPageSimple - Searches a given document for a match. Does not continue from where a match was found. Use FindInPage method instead
+DisableScriptDebugger - Set "Disable Script Debugger" registry keyname to "yes" and returns the keyname value before modification. This method was added to deal with IE7 disable script debugger registry values! Please refer to Registry Note below.
+IEVersion - Attempts to find IE version by searching IOmNavigator.userAgnet. sample 7.0
+AutomationTask_PerformSelectRadio2 - selects checkbox/radio button with the matching name/id + value - Thank you Jake
+
+Properties:
+IsLeftMouseClicked - Indicates if a left mouse click has occured. This value is coming from IEServerWindow instance which is used to subclass "Internet Explorer_Server" HWND
+
+Class:
+IEServerWindow - added a flag to determine if a left mouse click has occured. This functionality was added in case a user clicks a link before the page has fininshed loading. No HTML event is available to catch this.
+cHTMLSelectElementEvents - to handle select elements events
+
+Interface:
+HTMLSelectElementEvents2
+
+Removed:
+DrawThumb2 method as modified DrawThumb is able to handle frames as well
+OnVisibleChanged override method
+
+Improvements:
+Added CreateControl() method call to the constructor to enable the control to be used in hidden state
+
+BUG Fixs:
+GetActiveDocument - Was not checking "elem" against null "elem = doc2.activeElement;"
+COM component memory leak in CUrlParts::AllocateBuffers - was not setting Allocated to true
+
+Registry Note:
+
+This is IE7 specific. To receive script errors from MSHTML, we need to modify a registry key
+which controls display of script errors. Up to IE6, there was only one option which
+controlled displaying of script errors in any instance of webbrowser control whether embedded
+or in IE. But in IE7, we have two options, one for Internet explorer and one for other.
+
+By default, the Internet Option "Disable script debugging(other)" is unchecked
+and yet "Disable script debugging(Internet Explorer) is checked (I wonder why).
+Internet Options->Advanced (tab)->Browsing->Disable script debugging(other)
+
+To change this, set KeyName "Disable Script Debugger" from "no" to "yes".
+The keyname is located under registry key "Software\\Microsoft\\Internet Explorer\\Main".
+
+===============================
+28 Aug 2007 - Version (1.0.0.5)
+===============================
+Properties:
+MainDocumentFullyLoaded - returns whether the top level document has fully loaded.
+
+BUG Fixs:
+Placing the control on a panel in desgin time and closing the designer crashed VS IDE.
+
+===============================
+26 Aug 2007 - version (1.0.0.4)
+================================
+Interfaces:
+    IAsyncMoniker - added to LoadHTMLMoniker to resolve relative URLs properly and not as about:blank
+    IHostDialogHelper - to display a trusted HTML model dialog without the added title of ( - Internet Explorer...)
+    IHTMLCaret
+    ILineInfo
+    IHTMLEditServices
+    IHTMLEditServices2
+    IHTMLEditDesigner
+    IMarkupContainer
+    IHighlightRenderingServices
+    IMarkupPointer
+    IMarkupServices
+    IDisplayPointer
+    IDisplayServices
+    ISegment
+    ISegmentList
+    ISegmentListIterator
+    IHighlightSegment
+    IElementSegment
+    ISelectionServicesListener
+    ISelectionServices
+    IHTMLRenderStyle
+    IHTMLPainter
+    IHTMLPaintSite
+    IOmNavigator
+    IHTMLEditHost
+    IHTMLWindow3
+    IHTMLWindow4
+    IHTMLPopup - to display HTML tooltips
+
+Interfaces + methods to handle single Webbrowser history session based on ITravelLogxxx interfaces:
+    ITravelLogEntry
+    ITravelLogStg
+    IEnumTravelLogEntry
+
+    GetTravelLogCount
+    GetTraveLogEntries
+    AddTravelLogEntry
+    RemoveTravelLogEntries
+    RemoveTravelLogEntry
+Methods:
+    AddUrlToTrustedZone - Attempts to add a given url to internet trusted zone
+    UnicodeToHTMLEncoding - Attempts to convert UNICODE chars to their numeric values
+    to be used with LoadHtmlIntoBrowser methods. sample of output &#1581;
+    
+    ClearSessionCookies - Attempts to clear session cookies
+    UserAgnet - attempts to retreive IE useragnet
+    AutomationTask_PerformMultiSelectListItems
+    AutomationTask_SimulateKeyStroke
+    AutomationTask_NamedLinkScrollIntoView - Attempts to scroll into view a link given it's name or id
+    GetOpticalZoomRange - IE7
+    SetOpticalZoomRange - IE7
+    Ability to catch mouse back and foreard buttons via IEServerWindow class. Contributed by logan1337.
+
+Events:
+    To relay SnapRect calls of IHTMLEditHost interface added to csEXWB class. Used when designmode = on
+    HTMLEditHostSnapRectEventHandler
+    HTMLEditHostSnapRectEvent
+
+Misc:
+    frmWindowExternal to demonstrate communication between a page and this control
+      using ObjectForScripting property and javascript window.external
+    frmAutomation to demonstrate automation tasks such as selecting a list item,...
+    WindowEnumerator class and frmHTMLDialogHandler form to demonstrate how to intercept and monitor a HTML dialog launched using showModelessDialog() and showModalDialog() methods
+    HTMLEditHelper - added Underline(IHTMLElement) + Underline(int wordindex, int wordlen) methods.
+    Added popup handling to frmPopup.
+    frmHTMLParser to demonstrate Using HTMLParser (MSHTML) as a UI-less HTML parser
+    Added a FileSize parameter to FileDownloadExEventArgs event arguments.
+
+BUG FIXS:
+    PerformAutomationTask can perform searches based on name or id. And for htmloptionelements, either value or text
+    The doc2.body object is null when Clear() is called on a new instance of the control.
+    Undo, redo action in frmHTMLEditor was fixed
+    WinExternal class - added ComVisibleAttribute(true) and security permission declarations to have it recognized as a valid object
+    Setting FileDownloadDirectory property in form_load as this property, if not set, will reflect the file download directory of my pc.
+    execScript method - Was checking for the length of wrong parameter
+    AddThisIEServerHwndToComLib - Now it sets the IEServerHWND at every call.
+    While attempting to download attachements, Filename was being reported as GetAttachment.aspx (hotmail) in FileDownloadExStart event.
+
+===============================
+05 June 2007 - version (1.0.0.3)
+================================
+Additions:
+    Added an overload for public object InvokeScript(IWebBrowser2 wb, string ScriptName, object[] Data)
+    Added AutomationTask_PerformEnterDataTextArea method to automate text entry into a TextArea element
+    Added AutomationTask_PerformSubmitForm method to automate submission of a form
+
+ BUG_FIXS:
+    IDocHostShowUI.ShowMessage return value was incorrect
+
+===============================
+25 May 2007 - version (1.0.0.2)
+================================
+This is a big update, as it introduces many new functionalities and possibilities
+
+ ADDITIONS:
+  Control:
+    AutomationTask_PerformClickButton - Performs a click on a Button element with given name
+    AutomationTask_PerformClickLink - Performs a click on a Link element with given name
+    AutomationTask_PerformEnterData - Enters a given string into an input element with given name
+    AutomationTask_PerformSelectList - Selects a list item element with given list item value
+    AutomationTask_PerformSelectRadio - Selects a radio or checkbox element with given radio or checkbox name
+    GetElementsByName - Wrapper for IHTMLDocument3::getElementsByName
+    Return values to methods such as GoBack, GoForward,... to indicate failure or success
+    IHTMLElementEvents2, IHTMLDataTransfer Interfaces and cHTMLElementEvenets2 class to handle HTMLElementEvents2 of an HTMLElement. Used in frmHTMLEditor to demonstarte handling of internal drag drop of elements.
+    An assembly file to mark the control as COM visible
+    ObjectForScripting property. Allows javascript functions in an HTML page to call methods and properties of a an instance class passed to this property. Same as ObjectForScripting of C# Webbrowser wrapper control. An example of how to use this property has been provided in WinExternal class of frmMain
+    SetAllowHTMLDialogs and GetAllowHTMLDialogs methods - Allow or disallow HTML dialogs launched using showModelessDialog() and showModalDialog() methods using CBT Window Hook.
+    DocumentTitle property
+    DocumentSource property
+    DownloadImages property
+    DownloadSounds property
+    DownloadVideo property
+    DownloadActiveX property
+    DownloadJava property
+    DownloadFrames property
+    DownloadScripts property
+    Border3DEnabled property
+    ScrollBarsEnabled property
+    IProtectFocus interface - IE7 + Vista - Queries for permission to grab the focus when loading the page or when a script attempts to focus an element
+    AllowFocusChange event to notify client when focus is being changed
+    APP (Asynchronous pluggable protocols) OnBeginTransaction and OnResponse events via a COM assembly. This added functionality enables the clients to view all the request and responed headers of webbrowser control.
+    IDownloadManager interface via a COM assembly. If used, a client application can be notified via FileDownloadExXXXX events of a filedownload, replacing the default MSHTML download mechanism
+    Moved all HTML editing functions to HTMLEditHelper class
+    Added some paint related styles to constructor to avoid background painting
+    Added an overload to OleCommandExec(bool bTopLevel, MSHTML_COMMAND_IDS CmdID, object pvaIn) which accepts a parameter
+    IHTMLOMWindowServices interface - XP sp2 - Enables applications that are hosting the WebBrowser Control to intercept the window object calls for manipulating the host window coordinates from Dynamic HTML (DHTML) script
+    HTMLOMWindowServices_moveTo , HTMLOMWindowServices_moveBy, HTMLOMWindowServices_resizeTo, HTMLOMWindowServices_resizeBy events
+  Demo App:
+    Edit, Source, and Preview functionalities to frmHTMLEditor via a tab control
+    A CustomComboBox and ToolStripCustomComboBox to handle display of colors and fonts
+    A simple RichTextBox control with HTML syntax highlighting for viewing the source of the HTML document used in frmHTMLEditor
+    frmTableCellProp, to set/get a table cell properties in frmHTMLEditor
+    A tree containning most common HTML tags to be used in conjunction with the RichTextBox source editor in frmHTMLEditor
+    A custom SplitContainer based control, used in frmHTMLEditor
+    A ToolStripDropDown Html color selector.
+    frmFileDownload, to manage file downloads visual status (simple)
+    Removed frmThumbs. Moved thumb handling to main form via a toolstrip
+ BUG FIXS:
+  Methods:
+    GetSource(IWebBrowser2 thisBrowser), added support for UTF8 and UNICODE pages
+    Navigate(string URL, BrowserNavConstants Flags), using BrowserNavConstants.navOpenInNewWindow was loading
+    URL into the current control. Now it opens a new IE window
+    GetSource(bool bTopLevel), changed return value from innerHTML to outerHTML
+  Events:
+    NavigationError event
+  Interfaces:
+    IHTMLDocument2.write method def, psarray param changed from object[] to object
+    IHTMLDocument2.writeln method def, psarray param changed from object[] to object
+
+===============================
+19 Feb 2007 - Version (1.0.0.1)
+===============================
+BUG FIXS:
+IDocHostShowUI.ShowMessage
+DWebBrowserEvents2.WindowClosing
+
+Methods:
+DISPATCH_WindowClosing
+NavToBlank
+LoadHtmlIntoBrowser (Overloaded)
+
+===============================
+17 Jan 2007 - Version (1.0.0.0)
+===============================
+Initial Release
