@@ -1,0 +1,27 @@
+HKCR
+{
+	ComUtilities.UtilMan.1 = s 'UtilMan Class'
+	{
+		CLSID = s '{98EDB477-3064-4D0E-A09E-CC73F9AAB324}'
+	}
+	ComUtilities.UtilMan = s 'UtilMan Class'
+	{
+		CLSID = s '{98EDB477-3064-4D0E-A09E-CC73F9AAB324}'
+		CurVer = s 'ComUtilities.UtilMan.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {98EDB477-3064-4D0E-A09E-CC73F9AAB324} = s 'UtilMan Class'
+		{
+			ProgID = s 'ComUtilities.UtilMan.1'
+			VersionIndependentProgID = s 'ComUtilities.UtilMan'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{F8706742-6B5C-4E63-8DBD-9C79A14D2009}'
+		}
+	}
+}

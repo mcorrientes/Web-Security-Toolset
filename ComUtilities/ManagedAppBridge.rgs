@@ -1,0 +1,27 @@
+HKCR
+{
+	ComUtilities.ManagedAppBridge.1 = s 'ManagedAppBridge Class'
+	{
+		CLSID = s '{2E9178C0-D804-4A93-B55D-3FFF54B95FF1}'
+	}
+	ComUtilities.ManagedAppBridge = s 'ManagedAppBridge Class'
+	{
+		CLSID = s '{2E9178C0-D804-4A93-B55D-3FFF54B95FF1}'
+		CurVer = s 'ComUtilities.ManagedAppBridge.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {2E9178C0-D804-4A93-B55D-3FFF54B95FF1} = s 'ManagedAppBridge Class'
+		{
+			ProgID = s 'ComUtilities.ManagedAppBridge.1'
+			VersionIndependentProgID = s 'ComUtilities.ManagedAppBridge'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{F8706742-6B5C-4E63-8DBD-9C79A14D2009}'
+		}
+	}
+}

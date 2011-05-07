@@ -1,0 +1,221 @@
+// ComUtilities.idl : IDL source for ComUtilities
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ComUtilities.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+
+//-------------------------------------------------------------------------
+//
+//  IDownloadManager
+//
+//-------------------------------------------------------------------------
+//	interface IDownloadManager;
+	[
+		helpstring("IDownloadManager interface"),
+		object,
+		uuid(988934A4-064B-11D3-BB80-00104B35E7F9), // IID_IDownloadManager
+		pointer_default(unique),
+		local
+	]
+	interface IDownloadManager : IUnknown
+	{
+		HRESULT Download(
+			[in] IMoniker *pmk,         // Identifies the object to be downloaded
+			[in] IBindCtx *pbc,         // Stores information used by the moniker to bind 
+			[in] DWORD dwBindVerb,      // The action to be performed during the bind
+			[in] LONG grfBINDF,         // Determines the use of URL encoding during the bind
+			[in] BINDINFO *pBindInfo,   // Used to implement IBindStatusCallback::GetBindInfo
+			[in] LPCOLESTR pszHeaders,  // Additional headers to use with IHttpNegotiate
+			[in] LPCOLESTR pszRedir,    // The URL that the moniker is redirected to
+			[in] UINT uiCP              // The code page of the object's display name
+		);
+	};
+
+	typedef enum WINDOWSHOOK_TYPES
+	{
+		WHT_CALLWNDPROC		= 0,
+		WHT_CBT				= 1,
+		WHT_GETMESSAGE		= 2,
+		WHT_KEYBOARD		= 3,
+		WHT_MOUSE			= 4,
+		WHT_MSGFILTER		= 5,
+		WHT_KEYBOARD_LL		= 6,
+		WHT_MOUSE_LL		= 7,
+		WHT_FOREGROUNDIDLE	= 8,
+		WHT_CALLWNDPROCRET	= 9,
+		WHT_SYSMSGFILTER	= 10,
+		WHT_SHELL			= 11
+	}WINDOWSHOOK_TYPES;
+
+[
+	object,
+	uuid(DD264321-7025-476C-8B7A-850E0B79DD41),
+	dual,
+	nonextensible,
+	helpstring("IUtilMan Interface"),
+	pointer_default(unique)
+]
+interface IUtilMan : IDispatch{
+	[propget, id(1), helpstring("property HWNDInternetExplorerServer")] HRESULT HWNDInternetExplorerServer([out, retval] LONG* pVal);
+	[propput, id(1), helpstring("property HWNDInternetExplorerServer")] HRESULT HWNDInternetExplorerServer([in] LONG newVal);
+	[id(2), helpstring("Returns nCode for CBT, MSGFILTER, and SYSMSGFILTER hook process.")] HRESULT HookProcNCode([in] WINDOWSHOOK_TYPES lHookType, [in,out] long *nCode);
+	[id(3), helpstring("Start or stop a windows hook. Notifications are send via SendMessageTimeOut.")] HRESULT SetupWindowsHook([in] WINDOWSHOOK_TYPES lHookType,[in] long hwndTargetWnd, [in] VARIANT_BOOL bStart, [in,out] long *lUWMHookMsgID);	
+	[id(6), helpstring("method CancelFileDownload")] HRESULT CancelFileDownload([in] long DlUid);
+	[id(7), helpstring("method DownloadUrlAsync")] HRESULT DownloadUrlAsync([in] BSTR URL, [in, out] long *DLUID);
+	[propget, id(8), helpstring("property HTTPSprotocolManaged")] HRESULT HTTPSprotocolManaged([out, retval] VARIANT_BOOL *pVal);
+	[propput, id(8), helpstring("property HTTPSprotocolManaged")] HRESULT HTTPSprotocolManaged([in] VARIANT_BOOL newVal);
+	[propget, id(9), helpstring("property HTTPprotocolManaged")] HRESULT HTTPprotocolManaged([out, retval] VARIANT_BOOL *pVal);
+	[propput, id(9), helpstring("property HTTPprotocolManaged")] HRESULT HTTPprotocolManaged([in] VARIANT_BOOL newVal);
+	[id(10), helpstring("method GetScriptObjects")] HRESULT GetScriptObjects([in] IDispatch* ScriptDispatch, [in,out] BSTR* strObjects);
+};
+
+
+[
+	object,
+	uuid(EF49428E-8C06-4412-8F64-1CF796F0BEDF),
+	dual,
+	nonextensible,
+	helpstring("IManagedAppBridge Interface"),
+	pointer_default(unique)
+]
+interface IManagedAppBridge : IDispatch{
+	[id(1), helpstring("Called when client has finished downloading requested resource")] HRESULT DownloadCompleteManaged([in] BSTR sUrl, [in] BSTR sMime, [in] VARIANT *data, [in] long dataLength);
+	[id(2), helpstring("InetErrorCode, One of INET_E_xxxxx")] HRESULT DownloadAbortManaged([in] long InetErrorCode);
+	[propget, id(3), helpstring("Target webbrowser IEServerHwnd")] HRESULT IEServerHwnd([out, retval] LONG* pVal);
+	[propget, id(4), helpstring("Original request URL")] HRESULT URL([out, retval] BSTR* pVal);
+	[propput, id(4), helpstring("Original request URL")] HRESULT URL([in] BSTR pVal);
+	[propget, id(5), helpstring("RequestHeaders if any available")] HRESULT RequestHeaders([out, retval] BSTR* pVal);
+	[propget, id(6), helpstring("PostData if any available")] HRESULT PostData([out, retval] BSTR* pVal);
+	[propget, id(7), helpstring("PostDataMimeType if any available")] HRESULT PostDataMimeType([out, retval] BSTR* pVal);
+	[propput, id(8), helpstring("property DownloadData")] HRESULT DownloadData([in] VARIANT newVal);
+	[propget, id(9), helpstring("Download data Mime type")] HRESULT DataMimeType([out, retval] BSTR* pVal);
+	[propput, id(9), helpstring("Download data Mime type")] HRESULT DataMimeType([in] BSTR newVal);
+	[propget, id(10), helpstring("property DownloadCacheFileName")] HRESULT DownloadCacheFileName([out, retval] BSTR* pVal);
+	[propput, id(10), helpstring("property DownloadCacheFileName")] HRESULT DownloadCacheFileName([in] BSTR newVal);
+	[id(11), helpstring("Called when client has finished downloading requested resource and a filename is requested abd available")] HRESULT DownloadCompleteManagedCache([in] BSTR sUrl, [in] BSTR sMime, [in] BSTR sCacheFileName);
+};
+[
+	object,
+	uuid(C43E6EBA-1999-4089-B9EF-EAC44D4ED625),
+	dual,
+	nonextensible,
+	helpstring("ICustManageApp Interface"),
+	pointer_default(unique)
+]
+interface ICustManageApp : IDispatch{
+	[id(1), helpstring("method DownloadCompleteCustomApp")] HRESULT DownloadCompleteCustomApp([in] BSTR sUrl, [in] BSTR sMime, [in] VARIANT *data, [in] long dataLength);
+	[id(2), helpstring("InetErrorCode, One of INET_E_xxxxx")] HRESULT DownloadAbortCustomApp([in] long InetErrorCode);
+
+};
+[
+	uuid(F8706742-6B5C-4E63-8DBD-9C79A14D2009),
+	version(1.0),
+	helpstring("ComUtilities 1.0 Type Library")
+]
+library ComUtilitiesLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(D6B43A79-C0FC-4E85-8BB4-6235B81C6CBF),
+		helpstring("_IUtilManEvents Interface")
+	]
+	dispinterface _IUtilManEvents
+	{
+		properties:
+		methods:
+        [id(1), helpstring("Fired before a download begins. Provides information to download the file bypassing URLMON. bStopDownload, default = true.SendProgressEvents, default = true. sPathToSave = path and filename")]
+        void FileDownloadEx([in] LONG dlUID, [in] BSTR sURL,[in] BSTR sFilename,[in] BSTR sExt,[in] BSTR sFileSize, [in] BSTR sExtraHeaders,[in] BSTR sRedirURL,[in, out] VARIANT_BOOL* SendProgressEvents, [in,out] VARIANT_BOOL* bStopDownload, [in,out] BSTR* sPathToSave);
+
+		[id(2), helpstring("On progress")]
+        void OnFileDLProgress([in] LONG dlUID, [in] BSTR sURL,[in] LONG lProgress, [in] LONG lProgressMax, [in,out] VARIANT_BOOL* CancelDl);
+
+        [id(3), helpstring("Fired when downloading of data has finished but before data is fully written to file.")]
+        void OnFileDLEndDownload([in] LONG dlUID, [in] BSTR sURL, [in] BSTR sSavedFilePath);
+
+        [id(4), helpstring("On Download Errors")]
+        void OnFileDLDownloadError([in] LONG dlUID, [in] BSTR sURL, [in] BSTR sErrorMsg);
+
+        [id(5), helpstring("Fires before a basic or NTLM authentication. Supply username and password obtained from user or cancel download.")]
+        void OnFileDLAuthenticate([in] LONG dlUID, [in,out] BSTR* sUsername,[in,out] BSTR* sPassword, [in,out] VARIANT_BOOL* Cancel);
+
+        [id(8), helpstring("Before sending request headers to server. Gives client a chance to add additional headers.")]
+        void OnFileDLBeginningTransaction([in] LONG dlUID, [in] BSTR sURL, [in] BSTR sRequestHeaders, [in,out] BSTR * sAdditionalRequestHeaders, [in,out] VARIANT_BOOL* bResuming, [in,out] VARIANT_BOOL* bCancel);
+
+        [id(9), helpstring("After receiving the first initial response from server")]
+        void OnFileDLResponse([in] LONG dlUID, [in] BSTR sURL,[in] LONG lResponseCode,[in] BSTR sResponseHeaders, [in,out] VARIANT_BOOL* CancelDl);
+
+        [id(10), helpstring("Called from OnStart method of APP. pDispManagedAppBrigde can be used by casting to IManagedAppBridge interface. Set bClientHandled to false to have the default implementation download the resource.")]
+        void OnStartManagedAPP([in] BSTR URL, [in] BSTR RequestHeaders, [in] BSTR PostData, [in] BSTR PostDataMime, [in] IDispatch* pDispManagedAppBrigde, [in] VARIANT_BOOL bNeedFileName, [in,out] BSTR * sLocalFileName, [in,out] VARIANT_BOOL* bClientHandled, [in] VARIANT_BOOL bAsynchDownload, [in,out] VARIANT_BOOL* bCancelDownload);
+
+        [id(11), helpstring("Called from OnStart method of custom APP. pDispCustomApp can be used by casting to ICustManagedApp interface.")]
+        void OnStartCustManagedApp([in] BSTR URL, [in] IDispatch* pDispCustManagedApp);
+
+        [id(12), helpstring("Fired after the downloaded file has been fully written to disc and the handle has been released.")]
+        void OnFileDLFileFullyWritten([in] LONG dlUID, [in] BSTR sURL, [in] BSTR sSavedFilePath);
+
+		[id(13), helpstring("Potocol Handler, fired before sending request to server and BeforeNavigate2.")]
+		void ManagedAppBeginningTransaction([in] BSTR sURL, [in] BSTR sRequestHeaders, [in,out] BSTR* sAdditionalHeaders, [in,out] VARIANT_BOOL* Cancel);
+		
+		[id(14), helpstring("Potocol Handler, fired after a response have been received from server.")]
+		void ManagedAppOnResponse([in] BSTR sURL, [in] BSTR sResponseHeaders, [in] BSTR sRedirectedUrl, [in] BSTR sRedirectHeaders, [in,out] VARIANT_BOOL* Cancel);
+		
+		[id(16), helpstring("Fired when data has been fully read by MSHTML.")]
+		void ManagedAppDataFullyRead([in] BSTR sURL);
+
+		[id(17), helpstring("Fired when data has been fully downloaded and reay to be read by MSHTML.")]
+		void ManagedAppDataFullyAvailable([in] BSTR sURL);
+
+		[id(18), helpstring("Fired when the result of download of a resource is E_ABORT operation failed.")]
+		void ManagedAppOperationFailed([in] BSTR sURL);
+	};
+	[
+		uuid(98EDB477-3064-4D0E-A09E-CC73F9AAB324),
+		helpstring("UtilMan Class")
+	]
+	coclass UtilMan
+	{
+		[default] interface IUtilMan;
+		[default, source] dispinterface _IUtilManEvents;
+	};
+
+	[
+		uuid(2639DA95-E95D-48B8-A379-083D2FA3E9BC),
+		helpstring("_IManagedAppBridgeEvents Interface")
+	]
+	dispinterface _IManagedAppBridgeEvents
+	{
+		properties:
+		methods:
+	};
+	[
+		uuid(2E9178C0-D804-4A93-B55D-3FFF54B95FF1),
+		helpstring("ManagedAppBridge Class")
+	]
+	coclass ManagedAppBridge
+	{
+		[default] interface IManagedAppBridge;
+		[default, source] dispinterface _IManagedAppBridgeEvents;
+	};
+	[
+		uuid(B6C355FD-215E-40A6-92C5-564619B1FA86),
+		helpstring("_ICustManageAppEvents Interface")
+	]
+	dispinterface _ICustManageAppEvents
+	{
+		properties:
+		methods:
+	};
+	[
+		uuid(AD6E5643-7B0C-46AA-95AD-9773FF2A857A),
+		helpstring("CustManageApp Class")
+	]
+	coclass CustManageApp
+	{
+		[default] interface ICustManageApp;
+		[default, source] dispinterface _ICustManageAppEvents;
+	};
+};

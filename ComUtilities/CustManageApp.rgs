@@ -1,0 +1,27 @@
+HKCR
+{
+	ComUtilities.CustManageApp.1 = s 'CustManageApp Class'
+	{
+		CLSID = s '{AD6E5643-7B0C-46AA-95AD-9773FF2A857A}'
+	}
+	ComUtilities.CustManageApp = s 'CustManageApp Class'
+	{
+		CLSID = s '{AD6E5643-7B0C-46AA-95AD-9773FF2A857A}'
+		CurVer = s 'ComUtilities.CustManageApp.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {AD6E5643-7B0C-46AA-95AD-9773FF2A857A} = s 'CustManageApp Class'
+		{
+			ProgID = s 'ComUtilities.CustManageApp.1'
+			VersionIndependentProgID = s 'ComUtilities.CustManageApp'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{F8706742-6B5C-4E63-8DBD-9C79A14D2009}'
+		}
+	}
+}

@@ -1,0 +1,9 @@
+; ComUtilities.def : Declares the module parameters.
+
+LIBRARY      "ComUtilities.DLL"
+
+EXPORTS
+	DllCanUnloadNow		PRIVATE
+	DllGetClassObject	PRIVATE
+	DllRegisterServer	PRIVATE
+	DllUnregisterServer	PRIVATE
