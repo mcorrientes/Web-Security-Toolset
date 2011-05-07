@@ -76,10 +76,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="csExWB, Version=2.0.0.2, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>References\csExWB.dll</HintPath>
-    </Reference>
     <Reference Include="DnsDig, Version=1.0.0.1, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\DnsDig.dll</HintPath>
@@ -676,6 +672,12 @@
     <Folder Include="References\" />
     <Folder Include="Register\" />
     <Folder Include="SudomainScannerCode\Forms\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\csExWB\csExWB.csproj">
+      <Project>{E8E8BB5D-3302-4763-94F2-A8A238F7D6EA}</Project>
+      <Name>csExWB</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
